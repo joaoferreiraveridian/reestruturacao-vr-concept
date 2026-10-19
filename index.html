@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reestruturação VR Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ESTILO BASE do html-premium-kit. Nasceu da página do processo da clínica (2026-10-13), aprovada pelo João.
+   Copie este arquivo para a pasta da página e use as classes. Troque só os tokens do :root se a marca pedir. */
+:root{
+  --floresta:#10241C; --pinho:#1C4034; --musgo:#2d6a53; --perg:#EFE9DB; --perg2:#F8F4EA; --papel:#FFFDF7;
+  --ouro:#C9A227; --ouro-claro:#E7D58F; --vinho:#7A3325; --vinho-claro:#F3E3DD;
+  --txt:#10241C; --suave:#56675e; --linha:rgba(16,36,28,.12); --linha2:rgba(16,36,28,.2);
+  --sombra:0 1px 0 rgba(255,255,255,.7) inset,0 10px 28px -18px rgba(16,36,28,.35);
+  --sombra-alta:0 1px 0 rgba(255,255,255,.7) inset,0 18px 36px -18px rgba(16,36,28,.45);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;overflow-anchor:none}   /* sem rolagem suave global e sem ancoragem: a tela não mexe sozinha */
+body{margin:0;color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.6;overflow-anchor:none;
+  background:radial-gradient(1200px 500px at 85% -10%,rgba(201,162,39,.10),transparent 60%),var(--perg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;letter-spacing:-.015em;margin:0;line-height:1.15}
+h2{font-size:clamp(28px,4.2vw,40px);margin-bottom:8px}
+h3{font-size:20px;margin-bottom:8px}
+p{margin:0 0 10px}
+b{font-weight:600}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px;overflow-anchor:none}
+.muted{color:var(--suave);font-size:14px}
+.lead{font-size:17px;color:var(--suave);max-width:700px;margin-bottom:18px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:14px 0 6px}
+
+/* topo escuro */
+.hero{position:relative;background:var(--floresta);color:var(--perg);padding:52px 0 34px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(700px 360px at 90% 0%,rgba(28,64,52,.95),transparent 70%),radial-gradient(500px 300px at 0% 100%,rgba(201,162,39,.12),transparent 70%)}
+.hero .wrap{position:relative;z-index:1}
+.hero .tag0{display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ouro);border:1px solid rgba(201,162,39,.4);padding:4px 12px;border-radius:999px;margin-bottom:16px}
+.hero h1{font-size:clamp(36px,6.2vw,62px);max-width:780px}
+.hero h1 em{color:var(--ouro);font-style:italic;font-weight:300}
+.hero .sub{color:#bdb6a3;max-width:600px;margin:14px 0 0;font-size:16px}
+
+/* abas com indicador deslizante (o helpers.js move o #ind) */
+.tabs{position:sticky;top:0;z-index:30;background:rgba(239,233,219,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--linha)}
+.tabs .in{position:relative;display:flex;gap:2px;overflow-x:auto;padding:10px 20px;max-width:1080px;margin:0 auto;scrollbar-width:none}
+.tabs .in::-webkit-scrollbar{display:none}
+.tab{position:relative;z-index:1;flex:none;border:0;background:transparent;color:var(--suave);padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;transition:color .3s}
+.tab:hover{color:var(--txt)}
+.tab.on{color:var(--perg)}
+#ind{position:absolute;z-index:0;left:0;top:10px;height:36px;border-radius:999px;background:var(--floresta);box-shadow:0 6px 16px -8px rgba(16,36,28,.6);transition:transform .45s cubic-bezier(.5,0,.1,1),width .45s cubic-bezier(.5,0,.1,1)}
+
+/* painéis e movimento */
+.panel{display:none;padding:34px 0 80px}
+.panel.on{display:block}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--vinho);font-weight:600;margin-bottom:10px}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--ouro)}
+.eyebrow i{font-style:normal;color:var(--ouro)}
+.rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}   /* aparece ao rolar */
+.rv.in{opacity:1;transform:none}
+.up{animation:up .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*45ms)}   /* cascata de cartões */
+.swap{animation:swap .4s cubic-bezier(.2,.7,.2,1) both}                                       /* conteúdo que troca */
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes swap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,162,39,.5)}80%,100%{box-shadow:0 0 0 14px rgba(201,162,39,0)}}
+
+/* cartões e grades (filho de grid leva min-width:0) */
+.card{background:var(--perg2);border:1px solid var(--linha);border-radius:16px;padding:20px;margin:16px 0;box-shadow:var(--sombra)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+.grid>*{min-width:0}
+.grid .card{margin:0;transition:transform .3s,box-shadow .3s,border-color .3s}
+.grid .card:hover{transform:translateY(-3px);box-shadow:var(--sombra-alta);border-color:var(--linha2)}
+.two{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.two>*{min-width:0}
+@media(max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+.warn{background:linear-gradient(135deg,#f7edd2,#f3e6c0);border:1px solid rgba(201,162,39,.45);border-radius:14px;padding:14px 16px;margin:16px 0}
+.pain,.sys{border-radius:14px;padding:14px 16px;overflow-wrap:anywhere}
+.pain{background:var(--vinho-claro);border:1px solid rgba(122,51,37,.18)}
+.sys{background:#E1EBE5;border:1px solid rgba(28,64,52,.18)}
+.pain b,.sys b{display:flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.pain b::before,.sys b::before{content:"";width:8px;height:8px;border-radius:50%}
+.pain b{color:var(--vinho)}.pain b::before{background:var(--vinho)}
+.sys b{color:var(--pinho)}.sys b::before{background:var(--musgo)}
+
+/* botões, controle segmentado, etiquetas */
+.btn{border:1px solid var(--floresta);background:var(--floresta);color:var(--perg);padding:8px 16px;border-radius:10px;font-size:14px;font-weight:500;transition:all .25s;min-height:38px}
+.btn:hover{background:var(--pinho);transform:translateY(-1px)}
+.btn.alt{background:transparent;color:var(--floresta);border-color:var(--linha2)}
+.btn.alt:hover{background:rgba(16,36,28,.06);border-color:var(--floresta)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.seg{display:inline-flex;background:rgba(16,36,28,.07);border-radius:12px;padding:4px;gap:2px}
+.seg button{border:0;background:transparent;padding:7px 16px;border-radius:9px;font-size:14px;font-weight:500;color:var(--suave);transition:all .25s}
+.seg button.on{background:var(--floresta);color:var(--perg);box-shadow:0 4px 12px -6px rgba(16,36,28,.6)}
+.chip{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(16,36,28,.06);color:var(--suave)}
+.tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;font-weight:600}
+.t-ok{background:#cfe0d6;color:#1C4034}.t-pl{background:#ede0aa;color:#6b5510}.t-fa{background:#f1d3cb;color:var(--vinho)}.t-cf{background:#e4e1d8;color:#4a4a44}
+
+/* campos: nunca com a cara do navegador */
+input[type=number],input[type=text],input[type=search],select{font:inherit;font-size:15px;padding:9px 12px;border:1px solid var(--linha2);border-radius:10px;background:var(--papel);width:100%;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus{outline:none;border-color:var(--ouro);box-shadow:0 0 0 3px rgba(201,162,39,.22)}
+label{font-size:13px;color:var(--suave);font-weight:500}
+label input,label select{margin-top:4px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:rgba(16,36,28,.14);outline:none;margin:16px 0 8px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--floresta);border:3px solid var(--ouro);cursor:pointer;box-shadow:0 4px 10px -3px rgba(16,36,28,.5)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--floresta);border:3px solid var(--ouro);cursor:pointer}
+label.chk{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer;font-size:14px;color:var(--txt);font-weight:400}
+label.chk input{-webkit-appearance:none;appearance:none;flex:none;width:20px;height:20px;margin:1px 0 0;border:1.5px solid var(--linha2);border-radius:6px;background:var(--papel);position:relative;cursor:pointer;transition:all .2s;padding:0}
+label.chk input:checked{background:var(--floresta);border-color:var(--floresta)}
+label.chk input:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--ouro);border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+/* cartões de número (o helpers.js anima a contagem) */
+.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));margin-top:14px}
+.stat{background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:14px 16px;border-left:4px solid var(--pinho);min-width:0}
+.stat.bad{border-left-color:var(--vinho)}.stat.gold{border-left-color:var(--ouro)}
+.sl{font-size:12px;color:var(--suave);margin-bottom:2px}
+.sv{font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:300;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat.bad .sv{color:var(--vinho)}
+
+/* trilha horizontal sem barra de rolagem: máscara nas pontas no lugar da barra */
+.rolagem-limpa{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%)}
+.rolagem-limpa::-webkit-scrollbar{display:none}
+
+/* tabela */
+.pl{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;overflow:hidden;border:1px solid var(--linha);border-radius:12px;background:var(--papel)}
+.pl th{background:rgba(201,162,39,.14);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--vinho);text-align:left;padding:8px 14px}
+.pl td{padding:9px 14px;border-top:1px solid var(--linha);vertical-align:middle;overflow-wrap:anywhere}
+.pl td.v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.emp{padding:26px;text-align:center;color:var(--suave);border:1px dashed var(--linha2);border-radius:12px}
+
+@media(max-width:600px){.wrap{padding:0 16px}input[type=number],input[type=text],input[type=search],select{font-size:16px}.tab{padding:8px 12px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+
+</style>
+<style>
+/* Estilo próprio da página da reestruturação da VR Concept. Carregado depois do estilo-base.css do kit.
+   A marca da VR: grafite #252525 de base, dourado #E7B84E só como acento. Verde = bom ou pronto, vinho = dor, ouro = atenção. */
+:root{
+  --floresta:#1F1F1F; --pinho:#383838; --musgo:#4E7A64; --perg:#F2F0EB; --perg2:#FAF9F6; --papel:#FFFFFF;
+  --ouro:#A87D22; --ouro-claro:#E7B84E; --vinho:#8A3A2B; --vinho-claro:#F5E6E1;
+  --txt:#1F1F1F; --suave:#5F5C56; --linha:rgba(31,31,31,.11); --linha2:rgba(31,31,31,.2);
+  --sombra:0 1px 0 rgba(255,255,255,.8) inset,0 10px 28px -18px rgba(0,0,0,.30);
+  --sombra-alta:0 1px 0 rgba(255,255,255,.8) inset,0 18px 36px -18px rgba(0,0,0,.42);
+}
+body{background:radial-gradient(1200px 500px at 85% -10%,rgba(231,184,78,.10),transparent 60%),var(--perg)}
+.hero{background:#1B1B1B}
+.hero::before{background:radial-gradient(700px 360px at 90% 0%,rgba(70,70,70,.85),transparent 70%),radial-gradient(520px 300px at 0% 100%,rgba(231,184,78,.14),transparent 70%)}
+.hero .tag0{color:var(--ouro-claro);border-color:rgba(231,184,78,.45)}
+.hero h1 em{color:var(--ouro-claro)}
+.hero .sub{color:#BDB8AE}
+.tabs{background:rgba(242,240,235,.9)}
+.eyebrow{color:var(--txt)}
+.eyebrow::before{background:var(--ouro-claro)}
+.pl th{background:rgba(231,184,78,.16);color:var(--txt)}
+.warn{background:linear-gradient(135deg,#f9f0d8,#f4e8c6);border-color:rgba(168,125,34,.4)}
+:focus-visible{outline-color:var(--ouro-claro)}
+h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--suave);font-weight:600;margin:22px 0 10px}
+.selos{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--suave);margin:4px 0 16px}
+.bib{background:var(--papel);border:1px solid var(--linha);border-left:3px solid var(--ouro-claro);border-radius:12px;padding:12px 16px;margin:16px 0;font-size:14px}
+.bib b{font-weight:600}
+.cit{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:clamp(19px,2.4vw,24px);line-height:1.35;margin:18px 0 6px;max-width:820px}
+.cit+.quem{font-size:13px;color:var(--suave);margin-bottom:18px}
+
+/* etiqueta do braço: um quadrado é técnica, um círculo é gestão, meio a meio são as duas */
+.bu{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--suave)}
+.bu::before{content:"";width:7px;height:7px;background:currentColor;flex:none}
+.bu-gestao::before{border-radius:50%}
+.bu-duas::before{border-radius:50%;background:linear-gradient(90deg,currentColor 50%,transparent 50%);border:1px solid currentColor;width:6px;height:6px}
+
+/* O DESENHO: o mapa clicável da empresa */
+.desenho{display:grid;gap:18px;grid-template-columns:minmax(0,1fr) 330px;align-items:start;margin-top:14px}
+.mapa>*{min-width:0}
+.camada{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px}
+.rot{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--suave);font-weight:600;padding-top:12px}
+.rot i{display:block;font-style:normal;color:var(--ouro);font-family:Fraunces,Georgia,serif;font-size:20px;letter-spacing:0;font-weight:300;line-height:1.1}
+.nos{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(158px,100%),1fr));align-items:start}
+.no{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:11px 13px;box-shadow:var(--sombra);min-height:82px;transition:transform .25s,box-shadow .25s,border-color .25s,opacity .3s,filter .3s;min-width:0;width:100%}
+.no:hover{transform:translateY(-2px);box-shadow:var(--sombra-alta);border-color:var(--linha2)}
+.no .nn{display:block;font-weight:600;font-size:14px;line-height:1.3}
+.no .nt{display:block;font-size:12.5px;color:var(--suave);line-height:1.4}
+.no .nd{display:none;font-size:13.5px;line-height:1.55;color:var(--txt);border-top:1px solid var(--linha);margin-top:8px;padding-top:8px}
+.no .nd span{display:block;margin-bottom:6px}
+.no .nd .tk{font-weight:600;color:var(--ouro)}
+.no.on{border-color:var(--ouro-claro);box-shadow:0 0 0 3px rgba(231,184,78,.28),var(--sombra)}
+.no .lugar,.degr .lugar{display:inline-block;align-self:flex-start;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--linha2);color:var(--suave);margin-top:4px}
+.no.att{background:var(--floresta);border-color:var(--floresta);color:#F2F0EB}
+.no.att .nt,.no.att .bu{color:#BDB8AE}
+.no.att .lugar{background:var(--ouro-claro);border-color:var(--ouro-claro);color:#1F1F1F}
+.no.att .nd{color:#F2F0EB;border-top-color:rgba(255,255,255,.12)}
+.no.att .nd .tk{color:var(--ouro-claro)}
+.no.att.on,.no.att.ab{border-color:var(--ouro-claro);box-shadow:0 0 0 3px rgba(231,184,78,.32)}
+.degr.att .lugar{background:var(--ouro-claro);border-color:var(--ouro-claro);color:#1F1F1F}
+.degr.topo .lugar{border-color:rgba(255,255,255,.3);color:#D9D5CC}
+.legenda-lugar{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--suave);margin:10px 0 0}
+.legenda-lugar span{display:inline-flex;align-items:center;gap:6px}
+.legenda-lugar i{display:inline-block;width:12px;height:12px;border-radius:4px;border:1px solid var(--linha2);background:var(--papel)}
+.legenda-lugar i.att{background:var(--floresta);border-color:var(--floresta)}
+.legenda-lugar i.os{background:var(--ouro-claro);border-color:var(--ouro-claro)}
+.pecas{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+.peca{background:var(--papel);border:1px solid var(--linha);border-radius:16px;padding:18px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:6px}
+.peca.att{background:var(--floresta);color:#F2F0EB;border-color:transparent}
+.peca .pe{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--ouro)}
+.peca.att .pe{color:var(--ouro-claro)}
+.peca .pn{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:26px;line-height:1.1}
+.peca .ex{font-size:13px;color:var(--suave);font-style:italic}
+.peca.att .ex{color:#BDB8AE}
+.peca dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;margin:6px 0 0;font-size:13.5px}
+.peca dt{color:var(--suave);font-size:12px;padding-top:1px}
+.peca.att dt{color:#BDB8AE}
+.peca dd{margin:0}
+@media(max-width:860px){.pecas{grid-template-columns:minmax(0,1fr)}}
+.fluxo{display:grid;gap:8px;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:12px}
+.fluxo>div{background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:12px;font-size:13.5px;position:relative}
+.fluxo .n{font-family:Fraunces,Georgia,serif;color:var(--ouro);font-size:18px;line-height:1}
+.fluxo .onde{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--suave);font-weight:600;margin-top:6px}
+@media(max-width:900px){.fluxo{grid-template-columns:minmax(0,1fr)}}
+.no .rec{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ouro-claro);font-weight:600;margin-top:2px}
+.no .deg{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ouro-claro);font-weight:600}
+.seta{height:24px;position:relative;margin-left:124px}
+.seta::before{content:"";position:absolute;left:50%;top:3px;bottom:8px;width:1px;background:var(--linha2)}
+.seta::after{content:"";position:absolute;left:calc(50% - 4px);bottom:3px;border:4px solid transparent;border-top:6px solid var(--ouro)}
+.mapa[data-bu=tecnica] .no:not([data-bu=tecnica]):not([data-bu=duas]),
+.mapa[data-bu=gestao] .no:not([data-bu=gestao]):not([data-bu=duas]){opacity:.28;filter:grayscale(1)}
+.detalhe{position:sticky;top:72px;margin:0}
+.detalhe .tk{font-weight:600;color:var(--ouro);margin-bottom:10px}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;margin:14px 0 0;font-size:13.5px}
+.dl dt{color:var(--suave);font-size:12px;padding-top:1px}
+.dl dd{margin:0}
+@media(max-width:979px){
+  .desenho{grid-template-columns:minmax(0,1fr)}
+  .detalhe{display:none}
+  .no.ab .nd{display:block}
+  .no.ab{border-color:var(--ouro-claro)}
+}
+@media(max-width:600px){
+  .camada{grid-template-columns:minmax(0,1fr);gap:6px}
+  .rot{padding-top:0;display:flex;align-items:baseline;gap:8px}
+  .rot i{display:inline;font-size:16px}
+  .seta{margin-left:0}
+}
+
+/* cartões de produto da esteira */
+.pc{display:flex;flex-direction:column;gap:6px;transition:opacity .3s,filter .3s,transform .3s,box-shadow .3s}
+.pc .tk{font-weight:600;color:var(--ouro);font-size:14px;margin:0}
+.pc p{margin:0;font-size:14px}
+.pc .vai{font-size:12.5px;color:var(--suave);margin-top:4px}
+.apagado{opacity:.26;filter:grayscale(1)}
+.filtros{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 14px}
+.filtros .seg{flex-wrap:wrap}
+.degraus{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0}
+.degrau{background:var(--papel);border:1px solid var(--linha);border-radius:16px;padding:18px;box-shadow:var(--sombra);position:relative}
+.degrau.top{background:var(--floresta);color:#F2F0EB;border-color:transparent}
+.degrau .n{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);font-weight:600}
+.degrau.top .n,.degrau.top .tk{color:var(--ouro-claro)}
+.degrau h3{margin:4px 0 2px}
+.degrau .tk{font-weight:600;color:var(--ouro);font-size:13.5px;margin-bottom:10px}
+.degrau ul{margin:0;padding:0;list-style:none;font-size:14px}
+.degrau li{padding:6px 0 6px 18px;position:relative;border-top:1px solid var(--linha)}
+.degrau.top li{border-top-color:rgba(255,255,255,.1)}
+.degrau li::before{content:"";position:absolute;left:2px;top:14px;width:6px;height:6px;border-radius:50%;background:var(--musgo)}
+.degrau li.soma{color:var(--suave);font-style:italic}
+.degrau.top li.soma{color:#BDB8AE}
+.degrau li.soma::before{background:var(--ouro-claro)}
+@media(max-width:860px){.degraus{grid-template-columns:minmax(0,1fr)}}
+.sai{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr))}
+.sai>div{background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:12px 14px;font-size:14px}
+.sai b{display:block;margin-bottom:2px}
+
+/* a escadinha */
+.escada{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:end;margin-top:16px}
+.degr{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--papel);border:1px solid var(--linha);border-bottom:0;border-radius:16px 16px 0 0;padding:14px;box-shadow:var(--sombra);transition:transform .25s,box-shadow .25s,border-color .25s;min-width:0;width:100%}
+.degr:hover{transform:translateY(-3px);box-shadow:var(--sombra-alta)}
+.degr .dn{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:30px;line-height:1;color:var(--ouro)}
+.degr .dnome{font-weight:600;font-size:15px;line-height:1.25}
+.degr .dl2{font-size:13px;color:var(--suave);line-height:1.4}
+.degr .dt{margin-top:auto;padding-top:8px;font-size:12px;font-weight:600;color:var(--ouro)}
+.degr.mes .dt::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--musgo);margin-right:6px;vertical-align:1px}
+.degr.on{border-color:var(--ouro-claro);box-shadow:0 0 0 3px rgba(231,184,78,.28),var(--sombra)}
+.degr.topo{background:var(--floresta);color:#F2F0EB;border-color:transparent}
+.degr.topo .dn,.degr.topo .dt{color:var(--ouro-claro)}
+.degr.topo .dl2{color:#BDB8AE}
+.chao{grid-column:1/-1;background:var(--floresta);color:#F2F0EB;border-radius:0 0 18px 18px;padding:14px 18px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;box-shadow:0 18px 36px -20px rgba(0,0,0,.6)}
+.chao b{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:22px;color:var(--ouro-claro)}
+.chao span{font-size:13.5px;color:#D9D5CC;flex:1 1 320px}
+.legenda-mes{font-size:12.5px;color:var(--suave);margin:8px 0 0}
+.legenda-mes::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--musgo);margin-right:6px;vertical-align:1px}
+@media(max-width:760px){
+  .escada{grid-template-columns:minmax(0,1fr);gap:6px}
+  .degr{border-radius:14px;border-bottom:1px solid var(--linha);min-height:0!important;width:auto}
+  .chao{border-radius:14px;order:9}
+  /* no celular a escada sobe de baixo para cima: o VR Scan perto do chão, o VR Circle no alto e mais à direita */
+  .degr[data-k="0"]{order:5}
+  .degr[data-k="1"]{order:4;margin-left:16px}
+  .degr[data-k="2"]{order:3;margin-left:32px}
+  .degr[data-k="3"]{order:2;margin-left:48px}
+  .degr[data-k="4"]{order:1;margin-left:64px}
+}
+.edet .lista-p{display:grid;gap:8px;margin-top:10px}
+.edet .lista-p>div{background:var(--perg2);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;font-size:14px}
+.edet .lista-p b{display:block}
+.edet .lista-p .tk{font-weight:600;color:var(--ouro);font-size:13px}
+
+/* o VR Scan */
+.passos3{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0}
+.passos3>div{background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:14px;font-size:14px}
+.passos3 .n{font-family:Fraunces,Georgia,serif;color:var(--ouro);font-size:22px;line-height:1}
+.passos3 b{display:block;margin:4px 0}
+@media(max-width:760px){.passos3{grid-template-columns:minmax(0,1fr)}}
+.scan-box{display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,320px);align-items:start}
+@media(max-width:860px){.scan-box{grid-template-columns:minmax(0,1fr)}}
+.scan{display:grid;gap:6px}
+.sr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:9px 14px;font-size:14px;transition:border-color .3s}
+.sr .sn{font-weight:600;transition:color .3s}
+.sr .bu{min-width:78px}
+.dots{display:flex;gap:5px}
+.dots i{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--linha2);transition:background .3s,border-color .3s}
+.dots i.on{background:var(--pinho);border-color:var(--pinho)}
+.sr.trava{border-color:rgba(138,58,43,.35)}
+.sr.trava .sn{color:var(--vinho)}
+.sr.trava .dots i.on{background:var(--vinho);border-color:var(--vinho)}
+@media(max-width:480px){.sr{grid-template-columns:minmax(0,1fr) auto}.sr .bu{grid-column:1;grid-row:2;min-width:0}.sr .dots{grid-row:1/3;grid-column:2}}
+
+/* os níveis de acesso */
+.areas{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));margin-top:12px}
+.area{display:flex;gap:10px;align-items:flex-start;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;font-size:14px;transition:opacity .3s,filter .3s,border-color .3s}
+.area::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:var(--musgo);margin-top:6px}
+.area.off{opacity:.28;filter:grayscale(1)}
+.area.off::before{background:var(--linha2)}
+
+/* o Attlas: a empresa e as duas casas */
+.arvore{display:grid;gap:10px;margin-top:12px}
+.arvore .raiz{background:var(--floresta);color:#F2F0EB;border-radius:16px;padding:16px 18px}
+.arvore .raiz b{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:22px;color:var(--ouro-claro);display:block}
+.arvore .raiz span{font-size:13.5px;color:#D9D5CC}
+.arvore .filhos{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));position:relative}
+.arvore .filhos>div{background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:14px 16px;box-shadow:var(--sombra);font-size:14px}
+.arvore .filhos>div.vr{border-color:var(--ouro-claro);box-shadow:0 0 0 3px rgba(231,184,78,.22),var(--sombra)}
+.arvore .filhos b{display:block;font-size:16px;margin-bottom:4px}
+.arvore .filhos ul{margin:6px 0 0;padding-left:18px}
+@media(max-width:640px){.arvore .filhos{grid-template-columns:minmax(0,1fr)}}
+
+/* os nomes */
+.nome-c{display:flex;flex-direction:column;gap:6px}
+.nome-c .nm{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:24px;line-height:1.1}
+.nome-c .oq{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ouro);font-weight:600}
+.nome-c p{font-size:14px;margin:0}
+.nome-c .alt{font-size:12.5px;color:var(--suave);border-top:1px solid var(--linha);padding-top:8px;margin-top:4px}
+
+/* simulador */
+.simg{display:grid;gap:4px 22px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.simg label{display:block}
+.simg label b{float:right;color:var(--txt);font-variant-numeric:tabular-nums;font-weight:600}
+@media(max-width:640px){.simg{grid-template-columns:minmax(0,1fr)}}
+
+/* de para */
+.dp{display:grid;gap:10px;margin-top:14px}
+.dpr{display:grid;grid-template-columns:150px minmax(0,1fr) 22px minmax(0,1fr);gap:12px;align-items:center;text-align:left;background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;box-shadow:var(--sombra);width:100%;transition:border-color .25s,box-shadow .25s}
+.dpr:hover{border-color:var(--linha2);box-shadow:var(--sombra-alta)}
+.dpr .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);font-weight:600}
+.dpr .de{color:var(--vinho);font-size:14px}
+.dpr .para{color:var(--pinho);font-size:14px;font-weight:600}
+.dpr .sv2{color:var(--ouro);font-size:14px;text-align:center}
+.dpr .q{display:none;grid-column:1/-1;font-size:13.5px;color:var(--suave);border-top:1px solid var(--linha);padding-top:8px;font-style:italic}
+.dpr.ab .q{display:block}
+.dpr.ab{border-color:var(--ouro-claro)}
+@media(max-width:700px){
+  .dpr{grid-template-columns:minmax(0,1fr);gap:4px}
+  .dpr .sv2{text-align:left;transform:rotate(90deg);width:14px}
+}
+
+/* a tese: as duas metades e a matriz */
+.metade{background:var(--papel);border:1px solid var(--linha);border-radius:16px;padding:18px;box-shadow:var(--sombra)}
+.metade ul{margin:8px 0 0;padding-left:18px;font-size:14px}
+.metade li{margin:3px 0}
+.matriz-box{display:grid;gap:18px;grid-template-columns:minmax(0,460px) minmax(0,1fr);align-items:start;margin-top:12px}
+@media(max-width:860px){.matriz-box{grid-template-columns:minmax(0,1fr)}}
+.matriz{position:relative;width:100%;aspect-ratio:1/1;background:var(--papel);border:1px solid var(--linha);border-radius:16px;box-shadow:var(--sombra);overflow:hidden}
+.matriz::before{content:"";position:absolute;left:50%;top:6%;bottom:6%;width:1px;background:var(--linha)}
+.matriz::after{content:"";position:absolute;top:50%;left:6%;right:6%;height:1px;background:var(--linha)}
+.matriz .ax{position:absolute;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);font-weight:600}
+.matriz .ax.x{right:12px;bottom:8px}
+.matriz .ax.y{left:10px;top:10px}
+.matriz .q4{position:absolute;right:8%;top:6%;width:40%;height:38%;border-radius:12px;background:rgba(231,184,78,.10)}
+.neu{background:var(--perg2);border:1px solid var(--linha);border-radius:14px;padding:14px 16px;overflow-wrap:anywhere}
+.neu b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--suave);margin-bottom:6px}
+.pt{position:absolute;transform:translate(-12px,50%);display:flex;align-items:center;gap:6px;border:0;background:transparent;padding:6px;font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;border-radius:999px;transition:background .25s}
+.pt.e{flex-direction:row-reverse;transform:translate(12px,50%)}
+.pt.vr.e{transform:translate(14px,50%)}
+.pt i{width:12px;height:12px;border-radius:50%;background:var(--pinho);flex:none;box-shadow:0 0 0 3px rgba(31,31,31,.08);transition:transform .25s}
+.pt:hover{background:rgba(31,31,31,.05)}
+.pt:hover i{transform:scale(1.2)}
+.pt.on i{background:var(--ouro-claro);box-shadow:0 0 0 4px rgba(231,184,78,.3)}
+.pt.vr i{width:16px;height:16px;background:var(--ouro-claro);animation:pulse 2.4s infinite}
+.pt.vr{font-size:13px}
+.mdet h3{margin-bottom:6px}
+.mdet .tk{color:var(--ouro);font-weight:600;font-size:13.5px}
+.mdet .fontes{font-size:12.5px;color:var(--suave);margin-top:8px}
+.mdet a,.fon a{color:var(--txt);text-decoration-color:var(--ouro-claro);text-underline-offset:3px}
+@media(max-width:420px){.pt{font-size:11px;gap:4px;padding:4px}}
+
+/* o dentista */
+.persona{min-height:300px}
+.persona .frase{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:20px;line-height:1.35;margin:8px 0 14px}
+.persona .lin{display:grid;grid-template-columns:130px minmax(0,1fr);gap:8px 14px;font-size:14px;padding:8px 0;border-top:1px solid var(--linha)}
+.persona .lin dt{color:var(--suave);font-size:12px;padding-top:2px}
+.persona .lin dd{margin:0}
+@media(max-width:560px){.persona .lin{grid-template-columns:minmax(0,1fr);gap:2px}}
+.cam{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cam span{font-size:12.5px;background:rgba(31,31,31,.06);padding:3px 10px;border-radius:999px}
+.cam span+span::before{content:"";display:inline-block;width:0;height:0;border:4px solid transparent;border-left:5px solid var(--ouro);margin:0 8px 1px -4px;vertical-align:middle}
+.trav{display:grid;gap:8px}
+.trav>div{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;font-size:14px}
+.trav .num{font-family:Fraunces,Georgia,serif;color:var(--ouro);font-size:18px}
+@media(max-width:520px){.trav>div{grid-template-columns:24px minmax(0,1fr)}.trav .bu{grid-column:2}}
+
+/* o attlas */
+.passos{display:grid;gap:8px;grid-template-columns:repeat(6,minmax(0,1fr))}
+.passo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;transition:all .25s;min-width:0}
+.passo small{font-size:11px;color:var(--suave);font-weight:500}
+.passo i{font-style:normal;font-family:Fraunces,Georgia,serif;color:var(--ouro);font-weight:300;font-size:18px;line-height:1}
+.passo:hover{border-color:var(--linha2);transform:translateY(-2px)}
+.passo.on{background:var(--floresta);color:#F2F0EB;border-color:var(--floresta)}
+.passo.on small{color:#BDB8AE}
+.passo.on i{color:var(--ouro-claro)}
+@media(max-width:860px){.passos{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:420px){.passos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pdet .two{margin-top:10px}
+.pedidos{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))}
+.pedidos>div{display:flex;gap:10px;align-items:flex-start;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;font-size:14px}
+.pedidos>div::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ouro-claro);margin-top:7px}
+
+/* funil e time */
+.funil{display:grid;gap:10px;grid-template-columns:repeat(5,minmax(0,1fr));margin:12px 0}
+.fe{background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:14px;position:relative;box-shadow:var(--sombra);min-width:0}
+.fe .n{font-family:Fraunces,Georgia,serif;color:var(--ouro);font-size:20px;line-height:1}
+.fe b{display:block;margin:4px 0 4px}
+.fe p{font-size:13.5px;margin:0 0 8px}
+.fe .mede{font-size:12px;color:var(--suave);border-top:1px solid var(--linha);padding-top:6px;margin:0}
+.fe:last-child{background:var(--floresta);color:#F2F0EB;border-color:transparent}
+.fe:last-child .n{color:var(--ouro-claro)}
+.fe:last-child .mede{color:#BDB8AE;border-top-color:rgba(255,255,255,.12)}
+@media(max-width:900px){.funil{grid-template-columns:minmax(0,1fr)}}
+.canais{display:grid;gap:8px}
+.canal{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;transition:opacity .3s,filter .3s}
+.canal b{font-size:14px}
+.canal span.d{grid-column:1/-1;font-size:13px;color:var(--suave)}
+.pessoa{display:flex;flex-direction:column;gap:6px}
+.pessoa .papel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ouro);font-weight:600}
+.pessoa p{font-size:14px;margin:0}
+.pessoa .num{font-size:13px;border-top:1px solid var(--linha);padding-top:8px;margin-top:4px}
+.lista-nao{margin:0;padding:0;list-style:none;font-size:14px}
+.lista-nao li{padding:6px 0 6px 22px;position:relative}
+.lista-nao li::before{content:"";position:absolute;left:3px;top:15px;width:10px;height:2px;background:var(--vinho)}
+
+/* o caminho */
+.ordem{display:grid;gap:8px;margin-top:12px}
+.oi{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 12px;align-items:center;text-align:left;background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;width:100%;box-shadow:var(--sombra);transition:border-color .25s,box-shadow .25s}
+.oi:hover{border-color:var(--linha2);box-shadow:var(--sombra-alta)}
+.oi .n{font-family:Fraunces,Georgia,serif;color:var(--ouro);font-size:22px;line-height:1}
+.oi .t{font-weight:600;font-size:14.5px}
+.oi .x{display:none;grid-column:2/-1;font-size:14px;color:var(--suave)}
+.oi.ab .x{display:block}
+.oi.ab{border-color:var(--ouro-claro)}
+@media(max-width:520px){.oi{grid-template-columns:28px minmax(0,1fr)}.oi .tag{grid-column:2;justify-self:start}.oi .x{grid-column:1/-1}}
+.norte{background:var(--floresta);color:#F2F0EB;border-radius:18px;padding:22px;margin:18px 0;box-shadow:0 18px 36px -20px rgba(0,0,0,.6)}
+.norte .n{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro-claro);font-weight:600}
+.norte b{display:block;font-family:Fraunces,Georgia,serif;font-weight:300;font-size:clamp(24px,3.4vw,32px);margin:6px 0}
+.norte p{color:#BDB8AE;margin:0;font-size:14px}
+.marcos{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.marcos li{display:flex;gap:10px;align-items:flex-start;font-size:14px;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 14px}
+.marcos li::before{content:"";flex:none;width:14px;height:14px;border-radius:50%;border:1.5px solid var(--linha2);margin-top:3px}
+.dec{display:grid;gap:8px}
+.dec>div{background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;font-size:14px;border-left:3px solid var(--musgo)}
+.dec>div.ab{border-left-color:var(--ouro-claro)}
+.dec .rec{display:block;font-size:13px;color:var(--suave);margin-top:3px}
+.fon{font-size:13.5px;margin:0;padding-left:18px}
+.fon li{margin:4px 0}
+
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="wrap">
+  <span class="tag0">VR Concept · reestruturação · outubro de 2026</span>
+  <h1>Técnica e gestão, <em>numa empresa só</em></h1>
+  <p class="sub">O desenho novo da VR Concept de ponta a ponta: o que muda, para quem, a escada de produtos, as três peças que sustentam tudo, e a ordem.</p>
+</div></header>
+
+<nav class="tabs"><div class="in" id="tabs"></div></nav>
+
+<!-- 0. O DESENHO -->
+<section class="panel" id="p-desenho"><div class="wrap">
+  <h2>O desenho em uma tela</h2>
+  <p class="lead">A VR deixa de ser a empresa do guia de polimento. Vira a escola de técnica e gestão, e vende o Attlas Odonto, o sistema da clínica. Cada peça abre o que ela é, quanto custa, onde mora e para onde leva.</p>
+  <div class="selos"><span>🟢 dado com fonte</span><span>📚 biblioteca da Altta</span><span>🟡 hipótese, para decidir</span><span>🔴 falta levantar</span></div>
+  <div class="warn"><b>Em uma frase 🟡</b><br>Técnica sem gestão não cresce. Gestão sem técnica não fideliza. A VR ensina as duas, e a Odontonova prova.</div>
+  <div class="bar"><div class="seg" id="seg-bu"><button class="on" data-v="todas">Os dois braços</button><button data-v="tecnica">Técnica · Vinícius</button><button data-v="gestao">Gestão · Gabriela</button></div></div>
+  <div class="desenho">
+    <div><div class="mapa" id="mapa" data-bu="todas"></div>
+      <div class="legenda-lugar"><span><i></i>Mora na VR Academy</span><span><i class="att"></i>É o Attlas Odonto, o sistema da clínica</span><span><i class="os"></i>Tudo aparece no OS da VR</span></div></div>
+    <aside class="card detalhe" id="detalhe"></aside>
+  </div>
+</div></section>
+
+<!-- 1. O PONTO DE PARTIDA -->
+<section class="panel" id="p-partida"><div class="wrap">
+  <h2>Por que a VR vendia e não ficava</h2>
+  <p class="lead">A VR tinha o que quase ninguém tem: um dos melhores técnicos do país e uma gestora com uma clínica de ticket alto há sete anos. E foi reduzida a um produto de R$ 47. O que estava errado, dito na reunião de 8 de outubro.</p>
+  <div class="stats" id="st-partida"></div>
+  <h4>Como era e como fica · toque numa linha para ver o que foi dito</h4>
+  <div class="dp" id="dp"></div>
+  <div class="bib">📚 <b>A ordem desta página vem do Rumelt:</b> primeiro o diagnóstico (esta parte), depois a política que orienta (a tese) e por fim as ações que se encaixam umas nas outras (a escada, as peças e a ordem). Estratégia sem diagnóstico vira lista de desejos, que é o que acontecia quando cada ideia virava produto.</div>
+</div></section>
+
+<!-- 2. A TESE -->
+<section class="panel" id="p-tese"><div class="wrap">
+  <h2>O Método VR: técnica e gestão juntas</h2>
+  <p class="lead">O método sempre foi as duas metades. O mercado ensina uma ou outra. A VR é a única com prova das duas na mesma clínica.</p>
+  <p class="cit">"Não adianta, se fosse só comercial, as franquias estavam aí estouradas, mas elas não têm técnica. [...] E a odontologia precisa ter essa união, que é o que fez a Odontonova dar certo: a minha pessoa e a de Vinícius juntas."</p>
+  <p class="quem">Dra. Gabriela, na reunião de 2026-10-08 🟢</p>
+  <div class="two">
+    <div class="metade"><span class="bu bu-tecnica">BU Técnica</span><h3 style="margin-top:6px">Dr. Vinícius Rosa</h3><p class="muted" style="margin:0">A autoridade clínica. Faz o dentista entregar um resultado que o paciente mostra para os outros.</p>
+      <ul><li>Layout Virtual e Design VR</li><li>Lentes em resina (o OrganicFlow)</li><li>Estética, prótese, implante, reabilitação</li><li>O VR Hands-On, com correção na mão</li></ul></div>
+    <div class="metade"><span class="bu bu-gestao">BU Gestão</span><h3 style="margin-top:6px">Dra. Gabriela Rosa</h3><p class="muted" style="margin:0">A gestora da Odontonova. Faz o dentista vender o tratamento completo, receber e ser indicado.</p>
+      <ul><li>A consulta inicial e a Análise Full</li><li>O Mapeamento 3D apresentado ao paciente</li><li>O planejamento, o preço e o ticket alto</li><li>Boletos, balança financeira, inadimplência</li><li>A jornada do paciente até a indicação</li></ul></div>
+  </div>
+  <h4>A prova: a Odontonova 🟢</h4>
+  <div class="stats" id="st-odn"></div>
+  <p class="muted" style="margin-top:8px">Na reunião, a Gabriela contou que tirou o tráfego pago da clínica há uns três meses e o faturamento ficou igual. A planilha dela de captação mostra o tráfego com 0,54%, e a indicação e o Instagram com o resto.</p>
+  <h4>Onde cada um está · toque num ponto</h4>
+  <div class="matriz-box">
+    <div class="matriz" id="matriz"><div class="q4"></div><span class="ax x">Técnica →</span><span class="ax y">↑ Gestão</span></div>
+    <div class="card mdet" id="mdet" style="margin:0"></div>
+  </div>
+  <div class="card"><span class="bu bu-duas">Referência de estrutura, de outro mercado</span><h3 style="margin-top:6px">O G4 🟢</h3>
+    <p style="margin:0">Educação como canal; a comunidade (o G4 Club); um marketplace em que os parceiros abrem mão de margem para chegar à base, e o G4 ganha em cada venda (o G4 Tools); e um software de diagnóstico com IA (o G4 Skills). O clube de descontos com as dentais, ideia da Gabriela, é o G4 Tools da odontologia. O VR Scan é o G4 Skills.</p>
+    <p class="muted fon" style="padding:0;margin-top:8px">Fonte: <a href="https://www.infomoney.com.br/business/apos-o-primeiro-bilhao-g4-quer-triplicar-receita-com-ia-e-marketplace-ate-2027/" target="_blank" rel="noopener">InfoMoney, o G4 depois do primeiro bilhão</a></p></div>
+</div></section>
+
+<!-- 3. O DENTISTA -->
+<section class="panel" id="p-dentista"><div class="wrap">
+  <h2>Para quem é a VR</h2>
+  <p class="lead">Dentista que quer uma clínica de ticket alto que dura. São três jeitos de chegar, e cada um entra por um braço.</p>
+  <div class="bar"><div class="seg" id="seg-persona"><button class="on" data-v="tecnico">Domina a técnica e não cresce</button><button data-v="clinica">Clínica cheia que não lucra</button><button data-v="comeco">Está começando</button></div></div>
+  <div class="card persona" id="persona"></div>
+  <h4>Onde o dentista trava, e qual braço resolve</h4>
+  <div class="trav" id="trav"></div>
+  <p class="muted" style="margin-top:8px">As cinco opções são da pesquisa do aluno desenhada em setembro (<span style="white-space:nowrap">pesquisa-icp-2026.md</span>). 🔴 Não achei as respostas da base: o VR Scan passa a coletar isso de cada dentista que entra.</p>
+  <h4>Quem não é</h4>
+  <div class="pain"><b>Fica de fora</b>
+    <ul class="lista-nao">
+      <li>Quem procura atalho ou fórmula de faturamento sem estudar e treinar.</li>
+      <li>Quem indica tratamento que o paciente não precisa para vender mais. Indicação vem antes da venda.</li>
+      <li>Para o Attlas Odonto: a clínica de convênio, a clínica geral, a ortodontia e a bucomaxilo. É o recorte do Attlas (as decisões 33 a 36 do plano do Attlas, o recorte da odontologia). Esse dentista pode estudar na VR Academy; o sistema da clínica é para quem já vende particular.</li>
+    </ul></div>
+</div></section>
+
+<!-- 4. A ESCADA -->
+<section class="panel" id="p-esteira"><div class="wrap">
+  <h2>A escada de produtos</h2>
+  <p class="lead">Cinco degraus. O dentista entra de graça, aprende, passa a rodar a clínica no Attlas Odonto e sobe para os programas com a Gabriela e o Vinícius. Toque num degrau.</p>
+  <div class="escada" id="escada"></div>
+  <p class="legenda-mes">Paga todo mês: é a recorrência que a VR nunca teve.</p>
+  <div class="card edet" id="edet"></div>
+  <div class="bib">📚 <b>A escada sobe em sequência, e não abre tudo de uma vez.</b> O Warrillow é o único autor a favor de várias ofertas, e com condição: a segunda só entra quando a primeira já roda (a jurisprudência, §4.1, o voto a favor de várias ofertas). <b>O cancelamento acompanha o uso:</b> o Attlas Odonto, que a clínica abre todo dia, é a assinatura mais firme da escada. <b>E o degrau seguinte só se oferece depois do resultado</b> (Coleman): os números da clínica mostram quando ela está pronta. <b>Voto dissidente:</b> o Brunson, para quem mais degraus deixam gastar mais para trazer o cliente.</div>
+
+  <h4>O primeiro degrau: o VR Scan, explicado</h4>
+  <div class="passos3">
+    <div><span class="n">1</span><b>Responde</b>Umas 40 perguntas, uns 10 minutos, pelo celular: a clínica, o ticket, os casos que faz e onde trava.</div>
+    <div><span class="n">2</span><b>Recebe o mapa</b>As seis etapas do Método VR, com a nota dele em cada uma. Fica claro o que é técnica e o que é gestão.</div>
+    <div><span class="n">3</span><b>Recebe o próximo passo</b>O curso ou o programa certo, e o plano de estudo feito pela IA. Pronto em minutos.</div>
+  </div>
+  <div class="scan-box">
+    <div><div class="bar" style="margin-top:0"><div class="seg" id="seg-scan"><button class="on" data-v="tecnico">Exemplo 1</button><button data-v="clinica">Exemplo 2</button><button data-v="comeco">Exemplo 3</button></div></div>
+      <div class="scan" id="scan"></div></div>
+    <div class="sys" id="scan-prox"></div>
+  </div>
+  <div class="card" style="margin-top:14px"><b>Por que o VR Scan importa para a VR</b>
+    <ul class="lista-nao" style="margin-top:6px"><li style="padding-left:0">A conta do dentista nasce na VR Academy no primeiro minuto, e ele aparece no OS da VR. Dali para a frente, tudo o que ele faz fica medido.</li>
+    <li style="padding-left:0">Diz qual braço ele precisa primeiro, e evita vender o curso errado para a pessoa certa.</li>
+    <li style="padding-left:0">Ensina à VR onde a base trava, com número, e não por achismo.</li></ul></div>
+
+  <h4>Os nomes, para decidir com a Gabriela 🟡</h4>
+  <p class="muted" style="margin-top:-4px">No padrão da Altta (Altta Sales, Altta Rise): programa leva VR no nome e diz o que entrega; curso leva o nome do que ensina. O Guia de Polimento e o OrganicFlow ficam, porque já vendem.</p>
+  <div class="grid" id="nomes"></div>
+
+  <h4>O que sai, ou muda de lugar</h4>
+  <div class="sai">
+    <div><b>A mensalidade baixa de aluno</b>Sai. A recorrência vem do Attlas Odonto e do VR Circle.</div>
+    <div><b>Guia de Acabamento e Mapa de Cores</b>Viram bônus dentro da VR Academy. 🟡</div>
+    <div><b>A área de membros e a Hotmart</b>Os cursos mudam para a VR Academy. 🟡 A venda também, quando ela tiver o checkout próprio.</div>
+    <div><b>O funil pago em espanhol</b>Para. O que vende sozinho continua no ar.</div>
+    <div><b>O grupo de WhatsApp como comunidade</b>Sai. O grupo é o do VR Circle, dentro da VR Academy.</div>
+    <div><b>O tráfego para lead frio</b>Para. Volta só para amplificar o que já deu certo no orgânico.</div>
+  </div>
+</div></section>
+
+<!-- 5. AS TRÊS PEÇAS -->
+<section class="panel" id="p-attlas"><div class="wrap">
+  <h2>Três peças, cada uma no seu lugar</h2>
+  <p class="lead">O Attlas é o carro: a clínica dirige todo dia. A VR Academy é a autoescola: ensina o dentista e acompanha ele. O OS da VR é o escritório da autoescola: onde a VR vê quem comprou, de onde veio e quem está pronto para subir. Ninguém põe a autoescola dentro do carro.</p>
+  <div class="pecas">
+    <div class="peca"><span class="pe">A escola e os programas</span><span class="pn">VR Academy</span><span class="ex">A autoescola</span>
+      <dl><dt>De quem é</dt><dd>Da VR</dd><dt>Quem usa</dt><dd>O dentista, como aluno, tenha clínica ou não</dd><dt>O que mora</dt><dd>O VR Scan, os cursos, o VR Hands-On, a VR Journey e o VR Circle</dd><dt>Como nasce</dt><dd>🟡 Da base do Altta Academy, com banco e marca da VR</dd></dl></div>
+    <div class="peca att"><span class="pe">O sistema da clínica</span><span class="pn">Attlas Odonto</span><span class="ex">O carro</span>
+      <dl><dt>De quem é</dt><dd>Da empresa Attlas</dd><dt>Quem usa</dt><dd>A clínica: o dono, a secretária, os dentistas</dd><dt>O que mora</dt><dd>Agenda, prontuário, financeiro, WhatsApp e IA, com o Método VR dentro</dd><dt>Quem vende</dt><dd>A VR, para a clínica odontológica</dd></dl></div>
+    <div class="peca"><span class="pe">O escritório</span><span class="pn">OS da VR</span><span class="ex">O escritório da autoescola</span>
+      <dl><dt>De quem é</dt><dd>Da VR</dd><dt>Quem usa</dt><dd>O time da VR</dd><dt>O que mora</dt><dd>Toda venda, de onde veio cada dentista, o CRM, o WhatsApp, as tarefas, e as clínicas que a VR trouxe para o Attlas</dd><dt>Como nasce</dt><dd>Da base do OS da Altta, como foi combinado na reunião</dd></dl></div>
+  </div>
+  <h4>O Attlas: uma empresa, um sistema, duas versões</h4>
+  <div class="arvore">
+    <div class="raiz"><b>Attlas AI</b><span>Uma empresa separada, com marca e logo próprios (decisão sua, 2026-10-16). Um sistema só: toda melhoria vale para as duas versões.</span></div>
+    <div class="filhos">
+      <div><b>Attlas</b>Para a clínica de estética e harmonização.<ul><li>A Altta vende</li><li>A Altta vê só as clínicas que vendeu</li></ul></div>
+      <div class="vr"><b>Attlas Odonto</b>Para a clínica odontológica, com o Método VR dentro.<ul><li>A VR vende</li><li>A VR vê só as clínicas que vendeu</li></ul></div>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:8px">O painel onde cada parceiro vê as clínicas que vendeu já entrou no plano do Attlas (2026-10-16). Uma clínica nunca vê a outra, como já acontece hoje.</p>
+  <h4>Como as três conversam, na vida de um dentista</h4>
+  <div class="fluxo">
+    <div><span class="n">1</span><br>Faz o VR Scan e compra um curso<span class="onde">VR Academy</span></div>
+    <div><span class="n">2</span><br>A VR vê de onde ele veio e o que comprou<span class="onde">OS da VR</span></div>
+    <div><span class="n">3</span><br>A clínica dele assina o sistema<span class="onde">Attlas Odonto</span></div>
+    <div><span class="n">4</span><br>Entra na VR Journey, que lê os números da clínica com a permissão dela<span class="onde">VR Academy + Attlas Odonto</span></div>
+    <div><span class="n">5</span><br>Fica no VR Circle, todo mês<span class="onde">VR Academy</span></div>
+  </div>
+  <h4>Na VR Academy, o acesso abre pelo que a pessoa comprou · toque num nível</h4>
+  <div class="filtros"><div class="seg" id="seg-nivel"><button class="on" data-v="conta">VR Scan</button><button data-v="curso">Um curso</button><button data-v="academy">Acesso a tudo</button><button data-v="handson">VR Hands-On</button><button data-v="journey">VR Journey</button><button data-v="circle">VR Circle</button></div></div>
+  <div class="areas" id="areas"></div>
+  <p class="muted" style="margin-top:8px">O Attlas Odonto é uma assinatura à parte, da clínica. A VR Journey e o VR Circle leem os números dela de lá.</p>
+  <h4>Quem faz o quê na parceria</h4>
+  <div class="grid">
+    <div class="card"><span class="bu bu-duas">VR Concept</span><h3 style="margin-top:6px">A jornada do paciente</h3><p style="margin:0;font-size:14px">Da chegada à fidelização: a técnica do Vinícius e a gestão clínica da Gabriela. O método, a autoridade e a VR Academy.</p></div>
+    <div class="card"><span class="bu bu-duas">Altta</span><h3 style="margin-top:6px">Trazer e vender</h3><p style="margin:0;font-size:14px">O marketing, a captação, o comercial e o treinamento da equipe. 🟡 Os cursos de marketing e comercial da VR Academy vêm do Altta Academy, adaptados ao dentista.</p></div>
+    <div class="card"><span class="bu bu-duas">Attlas AI</span><h3 style="margin-top:6px">O sistema da clínica</h3><p style="margin:0;font-size:14px">O Attlas Odonto, que a VR vende, com o painel onde ela acompanha as clínicas que trouxe.</p></div>
+  </div>
+  <p class="cit">"A VR Concept vai trabalhar a jornada desse paciente desde a chegada dele até a fidelização. E a Altta vai trabalhar a parte de marketing, de captação, de comercial, de treinamento de equipe, e o software, a base tecnológica."</p>
+  <p class="quem">Dra. Gabriela, na reunião de 2026-10-08 🟢</p>
+  <h4>As seis etapas do Método VR, dentro do Attlas Odonto · toque numa etapa</h4>
+  <div class="passos" id="passos"></div>
+  <div class="card pdet" id="pdet"></div>
+  <h4>O que a Gabriela pediu para o sistema, na reunião 🟢</h4>
+  <div class="pedidos" id="pedidos"></div>
+  <div class="warn"><b>A definir entre os sócios 🔴</b><br>Como a mensalidade de uma clínica que a VR traz para o Attlas Odonto se divide entre a VR e o Attlas.</div>
+</div></section>
+
+<!-- 6. FUNIL E TIME -->
+<section class="panel" id="p-funil"><div class="wrap">
+  <h2>Como o dentista chega, e quem faz</h2>
+  <p class="lead">O dentista chega pela autoridade dos dois, não pelo anúncio. A base que já comprou é o primeiro público, a custo zero de mídia.</p>
+  <div class="funil" id="funil"></div>
+  <div class="bib">📚 <b>Só se oferece o degrau seguinte depois do resultado</b> (Coleman). E o grupo do VR Circle se forma por momento da carreira, nunca por cidade: dentistas da mesma cidade disputam o mesmo paciente (a jurisprudência, §9.2, comunidade entre concorrentes).</div>
+  <h4>Os canais</h4>
+  <div class="bar"><div class="seg" id="seg-canal"><button class="on" data-v="todos">Todos</button><button data-v="agora">Agora</button><button data-v="depois">Depois</button><button data-v="nao">Não</button></div></div>
+  <div class="canais" id="canais"></div>
+  <div class="bib">📚 <b>Canal novo se testa pequeno, com a hipótese escrita antes</b> (Weinberg, e a jurisprudência, §2.13, teste de canal é experimento). O tráfego volta assim: um post que já deu certo, um valor pequeno, a medida no OS da VR.</div>
+  <h4>O time</h4>
+  <div class="grid" id="time"></div>
+  <div class="warn"><b>A regra do time, da reunião</b><br>Ninguém entra só pelo salário. Cada frente tem um dono, uma entrega e um número. Trinta dias sem nada concreto é o sinal de alerta, porque foi o que aconteceu antes.</div>
+  <h4>O que não fazer</h4>
+  <div class="pain"><b>Fica proibido</b><ul class="lista-nao">
+    <li>Voltar ao tráfego para lead frio.</li>
+    <li>Lançar os produtos novos todos juntos.</li>
+    <li>Gravar curso longo como base da entrega.</li>
+    <li>Abrir grupo de WhatsApp como comunidade.</li>
+    <li>Vender encontro ao vivo em espanhol.</li>
+    <li>Prometer faturamento solto. A promessa é a clínica de ticket alto que dura, com a Odontonova de prova.</li>
+    <li>Criar produto para o paciente da VR (<i>"não funciona"</i>, Gabriela). O app do paciente é da clínica, dentro do Attlas Odonto.</li>
+  </ul></div>
+</div></section>
+
+<!-- 7. O CAMINHO -->
+<section class="panel" id="p-caminho"><div class="wrap">
+  <h2>A ordem, as decisões e o que falta</h2>
+  <p class="lead">Um passo por vez. Cada passo começa quando o anterior está de pé, e não numa data. Toque num passo para ver o detalhe.</p>
+  <div class="ordem" id="ordem"></div>
+  <div class="norte"><span class="n">O número que guia</span><b>Clínicas pagando todo mês</b><p>O Attlas Odonto e o VR Circle somados. Se ele sobe, a VR vira empresa. 📚 Quanto mais incerto o momento, mais perto tem de estar o objetivo (Rumelt).</p></div>
+  <h4>Os sinais de que está funcionando</h4>
+  <ul class="marcos">
+    <li>O Vinícius explica a empresa nova em um minuto, sem olhar esta página.</li>
+    <li>A Odontonova rodando no Attlas Odonto.</li>
+    <li>A base fazendo o VR Scan, cada dentista com a conta na VR Academy.</li>
+    <li>As primeiras clínicas pagando o Attlas Odonto todo mês.</li>
+    <li>A primeira VR Journey com o ticket da clínica medido antes e depois.</li>
+    <li>Uma turma do VR Hands-On cheia sem um real de tráfego.</li>
+    <li>O lucro contado do zero, a partir de 2026-10-08.</li>
+  </ul>
+  <h4>O que já está decidido 🟢</h4>
+  <div class="dec" id="dec"></div>
+  <h4>O que falta decidir, com a recomendada</h4>
+  <div class="dec" id="aberto"></div>
+  <h4>Fontes</h4>
+  <ul class="fon">
+    <li>A reunião de 2026-10-08, 139 minutos, no OS (Reuniões).</li>
+    <li>O desenho anterior: <span style="white-space:nowrap">documento-base-2026.md</span>, <span style="white-space:nowrap">plano-vr-100k.md</span>, <span style="white-space:nowrap">lacunas-e-prioridades.md</span> e <span style="white-space:nowrap">pesquisa-icp-2026.md</span>.</li>
+    <li>A biblioteca da Altta: a jurisprudência (§2.13, §4.1, §9.2), Rumelt, Warrillow, Coleman, Spinks, Weinberg, Make It Stick, Dirksen.</li>
+    <li><a href="https://www.speareducation.com/31703-2" target="_blank" rel="noopener">Spear Education, os planos</a> e <a href="https://www.speareducation.com/?p=29519" target="_blank" rel="noopener">os preços</a>.</li>
+    <li><a href="https://sucessodontoselect.com.br/clinicorp-vendas/" target="_blank" rel="noopener">Sucess Odonto, a mentoria vendida com a Clinicorp</a>.</li>
+    <li><a href="https://www.dentaloffice.com.br/dental-mentoria/" target="_blank" rel="noopener">Dental Office, o software que vende mentoria</a>.</li>
+    <li><a href="https://agamenonbueno.com/odontogerencie/" target="_blank" rel="noopener">OdontoGerencie, a imersão de gestão</a>.</li>
+    <li><a href="https://lentedecontatodental.com.br/para-dentistas/cursos/ieapom-lentes-facetas-premium" target="_blank" rel="noopener">IEAPOM, o curso presencial de lentes</a>.</li>
+    <li><a href="https://www.infomoney.com.br/business/apos-o-primeiro-bilhao-g4-quer-triplicar-receita-com-ia-e-marketplace-ate-2027/" target="_blank" rel="noopener">InfoMoney, o modelo do G4</a>.</li>
+  </ul>
+</div></section>
+
+<script>
+/* HELPERS do html-premium-kit. Peças de comportamento já testadas (a tela não rola sozinha, nada se redesenha à toa).
+   Uso: <script src="helpers.js"><\/script> antes do seu script. Depois: kit.abas(TABS, INIT) e as peças abaixo. */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const set=(el,h)=>{el.innerHTML=h};
+const R$=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const REDUZ=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* número que sobe até o valor novo (500ms). Use no .sv dos cartões de número. */
+function tween(el,to,fmt=R$){ const from=el._v||0; el._v=to; cancelAnimationFrame(el._r);
+  if(REDUZ||from===to){el.textContent=fmt(to);return}
+  const t0=performance.now(); const st=now=>{const k=Math.min(1,(now-t0)/520),e=1-Math.pow(1-k,3); el.textContent=fmt(from+(to-from)*e); if(k<1) el._r=requestAnimationFrame(st)}; el._r=requestAnimationFrame(st) }
+
+/* cartões de número: stats($('#caixa'),[{l:'Rótulo',v:1234,c:'bad'|'gold'|''}]). Reconstrói só se mudar a quantidade. */
+function stats(box,items,fmt=R$){
+  if(box.children.length!==items.length) set(box,items.map(()=>`<div class="stat"><div class="sl"></div><div class="sv">0</div></div>`).join(''));
+  [...box.children].forEach((c,k)=>{c.className='stat '+(items[k].c||'');c.firstChild.textContent=items[k].l;tween(c.lastChild,items[k].v,fmt)}) }
+
+/* cascata: os filhos entram um depois do outro (chame depois de preencher a lista) */
+function stagger(sel){ $$(sel).forEach((el,i)=>{el.style.setProperty('--i',i);el.classList.add('up')}) }
+
+/* aparecer ao rolar: só opacidade e deslocamento, nunca muda o tamanho do bloco */
+const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.05}):null;
+function reveal(painelSel){ $$(painelSel+' > .wrap > *').forEach(el=>{ if(el.classList.contains('rv'))return; el.classList.add('rv'); io?io.observe(el):el.classList.add('in') }) }
+
+/* controle segmentado: seg('#meu-seg', valor=>{...}) marca o botão e avisa. Botões levam data-v. */
+function seg(sel,fn){ const box=$(sel); box.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; $$('button',box).forEach(x=>x.classList.toggle('on',x===b)); fn(b.dataset.v)}) }
+
+/* ABAS. TABS=[['id','Nome'],...]; painéis são <section class="panel" id="p-ID"><div class="wrap">...; INIT[id] roda 1 vez, ao abrir.
+   Regras que já custaram caro: a tela NUNCA desce ao trocar de aba; só volta ao topo do conteúdo se a pessoa já tinha
+   passado dele, e sem animação. O indicador desliza. A faixa de abas rola só na horizontal. */
+const kit={
+  abas(TABS,INIT,{hero='.hero',inicial}={}){
+    const DONE={};
+    set($('#tabs'),'<span id="ind"></span>'+TABS.map(t=>`<button class="tab" data-t="${t[0]}">${t[1]}</button>`).join(''));
+    TABS.forEach((t,i)=>{const h=$('#p-'+t[0]+' h2'); if(h) h.insertAdjacentHTML('beforebegin',`<div class="eyebrow"><i>${String(i).padStart(2,'0')}</i>${i?'Parte '+i+' de '+(TABS.length-1):'Introdução'}</div>`)});
+    const ind=()=>{const b=$('.tab.on'), i=$('#ind'); if(!b||!i)return; i.style.width=b.offsetWidth+'px'; i.style.transform='translateX('+b.offsetLeft+'px)';
+      const t=$('#tabs'); t.scrollTo({left:b.offsetLeft-(t.clientWidth-b.offsetWidth)/2,behavior:'smooth'})};
+    const show=(id,user)=>{
+      if(!TABS.some(t=>t[0]===id)) id=TABS[0][0];
+      $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+id));
+      $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===id));
+      ind();
+      if(INIT[id]&&!DONE[id]){DONE[id]=1;INIT[id]()}
+      reveal('#p-'+id);
+      try{localStorage.setItem('kit-aba',id)}catch(e){}
+      history.replaceState(null,'','#'+id);
+      const topo=$(hero)?$(hero).offsetHeight:0;
+      if(user&&scrollY>topo) scrollTo({top:topo,behavior:'instant'});
+    };
+    $('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab'); if(b) show(b.dataset.t,true)});
+    addEventListener('resize',ind);
+    let first=location.hash.slice(1); try{ if(!first) first=localStorage.getItem('kit-aba')||'' }catch(e){}
+    show(inicial||first||TABS[0][0]);
+    if(document.fonts&&document.fonts.ready) document.fonts.ready.then(ind);
+    return show;
+  }
+};
+
+/* REGRAS DE OURO ao escrever peças (leia a skill design-de-primeira):
+   1. Nunca refaça com innerHTML o bloco que a pessoa está usando. Troque só o item (el.outerHTML) ou a classe.
+   2. Bloco que muda de altura leva min-height. Botões que trocam o conteúdo ficam FORA do bloco que muda.
+   3. Nada de scrollIntoView, scrollTo ou foco automático em clique. */
+
+</script>
+<script>
+/* ---------- os dados ---------- */
+const BU={tecnica:'Técnica',gestao:'Gestão',duas:'Os dois braços'};
+const EST={existe:['t-ok','Já existe'],muda:['t-pl','Muda de lugar'],novo:['t-pl','Novo'],adapta:['t-cf','Vem da Altta'],depois:['t-cf','Depois']};
+const CAM=[['atencao','Atenção'],['porta','A porta'],['sistema','O sistema'],['programas','Os programas'],['topo','O topo'],['depois','Depois']];
+const LUGAR={academy:'Na VR Academy',attlas:'Attlas Odonto'};
+const P=[
+ {id:'cont-vinicius',c:'atencao',bu:'tecnica',nome:'Conteúdo do Dr. Vinícius',curto:'Casos, layout, técnica',tk:'Grátis',e:'existe',
+  oque:'Os casos, o layout virtual, o antes e o depois, a técnica explicada. Já traz alcance sem mídia: o convite para o CIOSP veio de um vídeo orgânico.',fun:'Atenção e autoridade',para:'VR Scan, Guia de Polimento'},
+ {id:'cont-gabriela',c:'atencao',bu:'gestao',nome:'Conteúdo da Dra. Gabriela',curto:'Consulta, ticket, Odontonova',tk:'Grátis',e:'novo',
+  oque:'A consulta inicial, o ticket alto sem pressão, a rotina e os números da Odontonova. Hoje o Instagram da VR mostra só lente de resina, e a metade da gestão não aparece.',fun:'Atenção e autoridade',para:'VR Scan, Primeira Consulta VR'},
+ {id:'palestras',c:'atencao',bu:'duas',nome:'Palestras e congressos',curto:'O CIOSP e os próximos',tk:'Grátis',e:'existe',
+  oque:'O CIOSP, os congressos e as empresas do setor. É a autoridade que o tráfego não compra.',fun:'Autoridade',para:'VR Scan'},
+ {id:'base',c:'atencao',bu:'duas',nome:'A base de hoje',curto:'3.500 a 4.000 dentistas',tk:'Já comprou uma vez',e:'existe',
+  oque:'Quem já comprou um guia, o OrganicFlow ou o presencial, e os leads do WhatsApp. É o primeiro público de tudo, a custo zero de mídia. Os ex-alunos do presencial (uns 120) vêm primeiro: é a base de maior confiança.',fun:'O primeiro público',para:'VR Scan'},
+ {id:'scan',c:'porta',l:'academy',bu:'duas',nome:'VR Scan',curto:'O raio-x do dentista',tk:'Grátis',e:'adapta',
+  oque:'Umas 40 perguntas, uns 10 minutos, pelo celular. Mostra onde o dentista está forte e onde trava nas seis etapas do Método VR, e diz qual é o próximo passo. A conta dele nasce na VR Academy, e ele aparece no OS da VR: dali para a frente, tudo o que ele faz fica medido.',fun:'A porta de todos, e a direção',de:'O conteúdo, as palestras, a base',para:'O curso certo da VR Academy'},
+ {id:'guia',c:'porta',l:'academy',bu:'tecnica',nome:'Guia de Polimento',curto:'Curso · PT, ES, EN',tk:'🟢 R$ 47',e:'muda',
+  oque:'Continua vendendo, nos três idiomas, agora dentro da VR Academy. Muda o papel: deixa de ser a empresa e vira a porta mais barata da técnica.',fun:'Aquisição: paga o custo de trazer o dentista',de:'Conteúdo do Dr. Vinícius',para:'OrganicFlow'},
+ {id:'organicflow',c:'porta',l:'academy',bu:'tecnica',nome:'OrganicFlow',curto:'Curso · lentes em resina',tk:'🟢 R$ 997',e:'muda',
+  oque:'As três etapas das lentes em resina: Layout Virtual, Estratificação Orgânica e Acabamento Realista. Muda para a VR Academy, no formato interativo, aproveitando o que o Vinícius já gravou.',fun:'A primeira formação técnica, com margem',de:'Guia de Polimento',para:'VR Hands-On'},
+ {id:'consulta',c:'porta',l:'academy',bu:'gestao',nome:'Primeira Consulta VR',curto:'Curso · a consulta da Gabriela',tk:'🟡 R$ 497 a 997',e:'novo',
+  oque:'Um curso da VR Academy, interativo como os outros: o roteiro da consulta inicial da Gabriela, a anamnese dirigida, o Mapeamento 3D apresentado ao paciente e as perguntas que fazem o paciente escolher o tratamento completo em vez de apagar um incêndio. Nasce do Mapa da Primeira Consulta, que estava em construção.',fun:'A porta da gestão',de:'Conteúdo da Dra. Gabriela, VR Scan',para:'VR Journey'},
+ {id:'academy',c:'porta',l:'academy',bu:'duas',nome:'VR Academy, acesso a tudo',curto:'Todos os cursos, por ano',tk:'🟡 R$ 1.497 a 1.997 por ano',e:'novo',
+  oque:'A escola da VR é uma plataforma própria (🟡 nascida da base do Altta Academy, com banco e marca da VR). Cada curso se compra sozinho, e o acesso a todos vem por ano, com o encontro ao vivo do mês (uma vez técnica com o Vinícius, outra gestão com a Gabriela) e a IA que tira dúvida. Os cursos de marketing e comercial vêm do Altta Academy, adaptados ao dentista (🟡).',fun:'Educação: traz, ensina e prepara a subida',de:'VR Scan',para:'Attlas Odonto, VR Hands-On, VR Journey'},
+ {id:'attlas',c:'sistema',l:'attlas',bu:'duas',nome:'Attlas Odonto',curto:'O sistema que roda a clínica',tk:'🟡 R$ 297 a 997 por mês, mais a implantação',e:'novo',mes:1,
+  oque:'O sistema da clínica, da empresa Attlas, que a VR vende para a clínica odontológica. Tem o Método VR dentro: a consulta guiada, a simulação do sorriso, o plano de tratamento, os boletos com baixa automática, a balança financeira, o WhatsApp numa caixa, o app do paciente com a indicação. De bônus, o clube de descontos com as dentais e a pasta da vigilância pronta. Só para a clínica particular de ticket alto, o recorte do Attlas.',fun:'O eixo da recorrência: a clínica usa todo dia',de:'VR Academy, VR Journey',para:'VR Circle'},
+ {id:'handson',c:'programas',l:'academy',bu:'tecnica',nome:'VR Hands-On',curto:'Presencial com o Vinícius',tk:'🟢 hoje R$ 3.000 a 3.500 · 🟡 R$ 4.000 a 6.000',e:'muda',
+  oque:'O presencial com o Vinícius corrigindo na mão, em turma pequena. Vendido para a base e para quem fez o OrganicFlow, nunca para lead frio: nenhum aluno do presencial veio do tráfego. Vem com o acesso a tudo da VR Academy, para o aluno não sair no último dia.',fun:'Experiência, prestígio e caixa',de:'OrganicFlow, a base',para:'VR Circle'},
+ {id:'journey',c:'programas',l:'academy',bu:'gestao',nome:'VR Journey',curto:'A Gabriela implanta a jornada',tk:'🟡 R$ 15 a 30 mil',e:'novo',
+  oque:'A consultoria da Gabriela na clínica: implanta a jornada do paciente do Método VR, da consulta inicial à indicação, com o preço e o ticket, os boletos e a balança financeira. O programa mora na VR Academy (o plano, as tarefas, os encontros), e os números da clínica vêm do Attlas Odonto, com a permissão dela.',fun:'Ticket alto, e a porta do Attlas Odonto',de:'Primeira Consulta VR, VR Academy',para:'Attlas Odonto, VR Circle'},
+ {id:'circle',c:'topo',l:'academy',bu:'duas',nome:'VR Circle',curto:'Os dois, todo mês',tk:'🟡 R$ 1.500 a 3.000 por mês, ciclo de 12 meses',e:'novo',mes:1,
+  oque:'A mentoria contínua, em grupo, com a Gabriela e o Vinícius: as metas e os números da clínica lidos todo mês, um caso por encontro na cadeira quente, a revisão dos casos clínicos. Mora na VR Academy, com o acesso a tudo; a clínica precisa estar no Attlas Odonto, porque os números vêm de lá. A referência mais próxima é o Navigator da Spear, nos EUA, a US$ 1.695 por mês 🟢.',fun:'A recorrência alta: o topo, que não termina',de:'VR Journey, VR Hands-On, Attlas Odonto',para:'Fica, e indica'},
+ {id:'imersao-gestao',c:'depois',bu:'gestao',nome:'Imersão de Gestão',curto:'Dois dias com a Gabriela',tk:'🟡 Depois',e:'depois',
+  oque:'Dois dias com a Gabriela: a consulta e o ticket na prática. Só depois de a VR Journey ter casos medidos.',fun:'Experiência e caixa'},
+ {id:'formacao',c:'depois',bu:'duas',nome:'Formação Método VR',curto:'As seis etapas inteiras',tk:'🟡 Depois',e:'depois',
+  oque:'O método completo, da Análise Full ao VR+. Só quando as duas metades estiverem escritas e provadas.',fun:'Transformação e permanência'},
+ {id:'verticais',c:'depois',bu:'tecnica',nome:'Novas técnicas',curto:'Cerâmica, implante, reabilitação',tk:'🟡 Depois',e:'depois',
+  oque:'Novos cursos do Vinícius, pela demanda que o VR Scan e o VR Circle mostrarem, e nunca por intuição.',fun:'Subida técnica'},
+ {id:'internacional',c:'depois',bu:'duas',nome:'A VR em inglês',curto:'EUA, depois do Brasil',tk:'🟡 Depois',e:'depois',
+  oque:'O Brasil primeiro, por um ano a um ano e meio (a decisão da reunião). O desenho já nasce pensando no mundo. O espanhol fica só no digital que vende sozinho.',fun:'Expansão'}
+];
+const ach=id=>P.find(p=>p.id===id);
+const nomeCam=c=>CAM.find(x=>x[0]===c)[1];
+
+/* ---------- peças comuns ---------- */
+const chips=p=>`<span class="row" style="gap:8px"><span class="tag ${EST[p.e][0]}">${EST[p.e][1]}</span><span class="bu bu-${p.bu}">${BU[p.bu]}</span></span>`;
+const ondeMora=p=>p.l==='attlas'?'No Attlas Odonto, o sistema da clínica':p.l==='academy'?'Na VR Academy':'Fora das plataformas';
+const detalheHTML=p=>`<div class="swap">${chips(p)}<h3 style="margin-top:10px">${p.nome}</h3><p class="tk">${p.tk}</p><p style="font-size:14.5px">${p.oque}</p>
+  <dl class="dl"><dt>Camada</dt><dd>${nomeCam(p.c)}</dd><dt>Onde mora</dt><dd>${ondeMora(p)}</dd><dt>Função</dt><dd>${p.fun}</dd>${p.de?`<dt>Vem de</dt><dd>${p.de}</dd>`:''}${p.para?`<dt>Leva para</dt><dd>${p.para}</dd>`:''}</dl></div>`;
+/* altura fixa para o bloco que troca de conteúdo: mede todas as versões e guarda a maior */
+function fixarAltura(el,versoes,atual){
+  const medir=()=>{el.style.minHeight='';let m=0;versoes.forEach(h=>{el.innerHTML=h;m=Math.max(m,el.offsetHeight)});el.style.minHeight=m+'px';el.innerHTML=atual()};
+  medir(); let t; addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(medir,150)});
+}
+function numeros(box,itens){
+  set(box,itens.map(i=>`<div class="stat ${i.c||''}"><div class="sl">${i.l}</div><div class="sv">${i.t||'0'}</div></div>`).join(''));
+  [...box.children].forEach((c,k)=>{const i=itens[k]; if(i.t===undefined) tween(c.lastChild,i.v,i.f)});
+}
+const inteiro=x=>Math.round(x).toLocaleString('pt-BR');
+
+/* ---------- as abas ---------- */
+const TABS=[['desenho','O desenho'],['partida','O ponto de partida'],['tese','A tese'],['dentista','O dentista'],['esteira','A escada'],['attlas','As três peças'],['funil','Funil e time'],['caminho','O caminho']];
+const INIT={
+  desenho(){
+    const no=p=>`<button class="no${p.l==='attlas'?' att':''}" data-k="${p.id}" data-bu="${p.bu}"><span class="bu bu-${p.bu}">${BU[p.bu]}</span><span class="nn">${p.nome}</span><span class="nt">${p.curto}</span>${p.l?`<span class="lugar">${LUGAR[p.l]}</span>`:''}${p.mes?'<span class="rec">Todo mês</span>':''}
+      <span class="nd"><span class="tk">${p.tk}</span><span>${p.oque}</span>${p.para?`<span><b>Leva para:</b> ${p.para}</span>`:''}</span></button>`;
+    set($('#mapa'),CAM.map((c,i)=>`${i?'<div class="seta"></div>':''}<div class="camada"><div class="rot"><i>${String(i+1).padStart(2,'0')}</i>${c[1]}</div><div class="nos">${P.filter(p=>p.c===c[0]).map(no).join('')}</div></div>`).join(''));
+    const det=$('#detalhe'); let sel='attlas';
+    fixarAltura(det,P.map(detalheHTML),()=>detalheHTML(ach(sel)));
+    const marcar=()=>$$('#mapa .no').forEach(b=>b.classList.toggle('on',b.dataset.k===sel));
+    const grande=matchMedia('(min-width:980px)');
+    if(grande.matches) marcar();
+    $('#mapa').addEventListener('click',e=>{const b=e.target.closest('.no'); if(!b)return;
+      if(grande.matches){ if(b.dataset.k===sel)return; sel=b.dataset.k; marcar(); det.innerHTML=detalheHTML(ach(sel)); }
+      else b.classList.toggle('ab');
+    });
+    seg('#seg-bu',v=>{$('#mapa').dataset.bu=v});
+  },
+  partida(){
+    numeros($('#st-partida'),[
+      {l:'Dentistas na base, quase nenhum pagando todo mês',t:'3.500 a 4.000'},
+      {l:'Alunos do presencial que vieram do tráfego',v:0,f:inteiro,c:'bad'},
+      {l:'Tráfego que comeu o lucro de uma turma',v:9000,f:R$,c:'bad'},
+      {l:'Idiomas ao mesmo tempo, sem estrutura no Brasil',v:3,f:inteiro,c:'bad'}]);
+    const L=[
+      ['O que a VR é','A empresa do guia de polimento','A escola de técnica e gestão, que também vende o sistema da clínica','"Praticamente encaixotamos vocês dois em um guia de polimento de R$ 47." (João)'],
+      ['Quem aparece','Só o Dr. Vinícius, e só lente de resina','O Vinícius na técnica e a Gabriela na gestão: os dois braços','"A gente pega o Instagram da VR para você só ver lente de resina. Não é mais nada." (Gabriela)'],
+      ['Como o dinheiro entra','Venda única, de ticket baixo, e comprou, acabou','Uma escada: o Attlas Odonto e o VR Circle pagos todo mês, e o dentista fica','"Cadê a receita recorrente?" e "o doutor vai entrar hoje e só vai sair daqui a nunca." (João)'],
+      ['O método','Sumido das páginas de venda','O Método VR, técnica e gestão juntas, no centro de tudo','"Cadê o método? Cadê a estrutura do método?" (João)'],
+      ['A prova','Nenhuma: a Odontonova nunca foi usada','A Odontonova: 3 cadeiras, cidade de 50 mil, 80% de indicação','"A gente não usou o maior case da VR Concept, que é a clínica Odontonova." (João)'],
+      ['De onde vem o aluno','Tráfego pago para lead frio','A base, o orgânico dos dois, as palestras e a indicação','"Quem foram os alunos que fecharam? Teve algum do tráfego? Zero. O lead chega frio demais." (Gabriela)'],
+      ['Como se aprende','Vídeo gravado e grupo de WhatsApp','Curso interativo na VR Academy, IA e encontro ao vivo','"As pessoas não assistem, ninguém aguenta mais" e "esse modelo de comunidade do WhatsApp já foi." (Gabriela)'],
+      ['Onde está tudo','Hotmart, Cakto, Hubla, área de membros e WhatsApp, cada um num canto','Três peças ligadas: a VR Academy, o Attlas Odonto e o OS da VR, que vê toda venda e de onde veio cada um','"Centralização de dados. Se eu tenho um dado aqui, um outro lá, eu não consigo centralizar nada." (João)'],
+      ['Onde a VR vende','Três idiomas ao mesmo tempo, só no digital','O Brasil primeiro, já desenhado para o mundo','"A internacionalização penalizou muito até o próprio mercado brasileiro." (João)'],
+      ['Como se decide','Ideia atrás de ideia, produto atrás de produto','Um desenho, um dono por frente e um número','"Muito produto e sem estratégia." (João) e "mil criativos por semana não dá pra gente." (Gabriela)']];
+    set($('#dp'),L.map(r=>`<button class="dpr"><span class="k">${r[0]}</span><span class="de">${r[1]}</span><span class="sv2">→</span><span class="para">${r[2]}</span><span class="q">${r[3]}</span></button>`).join(''));
+    stagger('#dp > .dpr');
+    $('#dp').addEventListener('click',e=>{const b=e.target.closest('.dpr'); if(b) b.classList.toggle('ab')});
+  },
+  tese(){
+    numeros($('#st-odn'),[
+      {l:'Anos de clínica',v:7,f:inteiro},{l:'Cadeiras',v:3,f:inteiro},{l:'Faturamento por ano',t:'R$ 2 a 3 mi',c:'gold'},
+      {l:'Pacientes por indicação',v:80,f:x=>Math.round(x)+'%'},{l:'Captação por tráfego pago',v:0.54,f:x=>x.toFixed(2).replace('.',',')+'%'},
+      {l:'Habitantes na cidade',v:50000,f:inteiro},{l:'Um tratamento completo',t:'R$ 20 a 70 mil'}]);
+    const PT=[
+      {id:'cursos',x:82,y:20,lado:'e',nome:'Cursos de técnica',ex:'IEAPOM, Eme Academy, os institutos de lentes',tk:'🟢 presencial de lentes: R$ 5.000 (IEAPOM, 2026)',
+       falta:'Ensinam a fazer a lente e não ensinam a vender, cobrar e fazer o paciente voltar. O dentista sai sabendo e continua preso no consultório.',f:[['IEAPOM','https://lentedecontatodental.com.br/para-dentistas/cursos/ieapom-lentes-facetas-premium'],['Eme Academy','https://eme.academy/cursos/master-lentes-em-resina-composta-extra-junho-2026/']]},
+      {id:'gurus',x:14,y:78,lado:'d',nome:'Mentorias de gestão',ex:'Sucess Odonto (Ricardo Novack), OdontoGerencie, mentorias individuais',tk:'🟢 imersão de gestão de 2 dias: R$ 5.127 (OdontoGerencie)',
+       falta:'Ensinam comercial e marketing, sem técnica e sem entrega clínica. Sem a entrega, o paciente não volta nem indica. A Sucess Odonto já vende a mentoria junto com a Clinicorp.',f:[['Sucess Odonto','https://sucessodontoselect.com.br/clinicorp-vendas/'],['OdontoGerencie','https://agamenonbueno.com/odontogerencie/']]},
+      {id:'franquias',x:18,y:50,lado:'d',nome:'Franquias',ex:'Redes como a Odontotop',tk:'🔴 preços não levantados',
+       falta:'Comercial forte e entrega fraca: "elas não treinam equipe técnica, elas não fidelizam, é o paciente de uma vez só" (Gabriela). E a Odontotop já está levando curso de gestão para dentro do Controle Odonto.',f:[]},
+      {id:'softwares',x:10,y:34,lado:'d',nome:'Softwares',ex:'Controle Odonto, Clinicorp, Simples Dental, Dental Office',tk:'🟢 de R$ 120 a 370 por mês (a pesquisa do Attlas)',
+       falta:'Ferramenta sem método. O Controle Odonto, o mais completo que a Gabriela conhece, tem nota 2,9 no Google e 7,2 no Reclame Aqui, sem WhatsApp e sem a origem do paciente. A Dental Office já vende uma mentoria junto do software.',f:[['Dental Office','https://www.dentaloffice.com.br/dental-mentoria/']]},
+      {id:'spear',x:72,y:62,lado:'e',nome:'Spear (EUA)',ex:'Técnica, equipe e coaching, por assinatura',tk:'🟢 US$ 270 por mês o online · US$ 2.500 por ano a clínica · US$ 1.695 por mês o Navigator',
+       falta:'É o modelo mais parecido com o desenho novo da VR, lá fora: estudo por assinatura, plano da clínica e um plano com coaching e números. Não tem o sistema da clínica, e não fala português.',f:[['Spear, os planos','https://www.speareducation.com/31703-2'],['Spear, os preços','https://www.speareducation.com/?p=29519']]},
+      {id:'vr',x:86,y:92,lado:'e',nome:'VR Concept',ex:'A técnica do Vinícius, a gestão da Gabriela e o Attlas Odonto',tk:'A escada nova',vr:1,
+       falta:'O que ninguém junta: técnica de ponta, gestão com uma clínica de prova (a Odontonova) e o sistema que a clínica usa todo dia.',f:[]}];
+    $('#matriz').insertAdjacentHTML('beforeend',PT.map(p=>`<button class="pt ${p.lado==='e'?'e':'d'} ${p.vr?'vr':''}" data-k="${p.id}" style="${p.lado==='e'?'right:'+(100-p.x):'left:'+p.x}%;bottom:${p.y}%"><i></i>${p.nome}</button>`).join(''));
+    const html=p=>`<div class="swap"><span class="bu bu-duas">${p.ex}</span><h3 style="margin-top:8px">${p.nome}</h3><p class="tk">${p.tk}</p><p style="font-size:14.5px;margin:0">${p.falta}</p>${p.f.length?`<p class="fontes">Fonte: ${p.f.map(x=>`<a href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a>`).join(' · ')}</p>`:''}</div>`;
+    let sel='vr'; const box=$('#mdet');
+    fixarAltura(box,PT.map(html),()=>html(PT.find(p=>p.id===sel)));
+    const marcar=()=>$$('#matriz .pt').forEach(b=>b.classList.toggle('on',b.dataset.k===sel)); marcar();
+    $('#matriz').addEventListener('click',e=>{const b=e.target.closest('.pt'); if(!b||b.dataset.k===sel)return; sel=b.dataset.k; marcar(); box.innerHTML=html(PT.find(p=>p.id===sel))});
+  },
+  dentista(){
+    const PE={
+      tecnico:{t:'Domina a técnica e não cresce',bu:'gestao',entra:'Entra pela gestão',frase:'"Fantástico na técnica [...] mas não cresce porque o comercial não tem."',quem:'A Gabriela, sobre um colega',
+        perfil:'Dentista bom de mão, com casos bonitos, preso na agenda do próprio consultório. Já fez muitos cursos de técnica.',dor:'Sabe fazer e não sabe vender, cobrar, nem fazer o paciente voltar e indicar.',
+        precisa:'A metade da gestão: a consulta que leva ao tratamento completo, o preço, a jornada do paciente.',porta:'O VR Scan e o curso Primeira Consulta VR',cam:['VR Scan','Primeira Consulta VR','VR Journey','Attlas Odonto','VR Circle']},
+      clinica:{t:'A clínica cheia que não lucra',bu:'tecnica',entra:'Entra pela técnica',frase:'"Fiz um curso uma vez, mas não domino muito."',quem:'Uma cliente da Altta, sobre lentes, contada pelo João',
+        perfil:'Clínica com seis pessoas na equipe, quase 300 atendimentos por mês, ticket médio de R$ 119, muito convênio, uns R$ 30 mil por mês.',dor:'Bateu no teto. Para crescer teria de pôr mais cadeira e mais gente, e não consegue gerir nem a equipe que tem.',
+        precisa:'A técnica, para vender tratamento de ticket alto, e a gestão, para sair do convênio.',porta:'O Guia de Polimento, o OrganicFlow e o conteúdo do Vinícius',cam:['Guia de Polimento','OrganicFlow','VR Hands-On','Attlas Odonto, quando sair do convênio'],
+        nota:'Enquanto tiver convênio, fica na VR Academy e no VR Hands-On: o Attlas Odonto é só para a clínica particular, o recorte do Attlas.'},
+      comeco:{t:'Está começando',bu:'duas',entra:'Entra por qualquer porta',frase:'"Já fiz vários cursos, mas não sei por onde começar."',quem:'A frase do aluno, no documento base de 2026',
+        perfil:'Dentista de 3 a 10 anos de formado, às vezes sem clínica própria: associado, sócio, ou com um consultório pequeno.',dor:'O conhecimento está em pedaços, e ninguém mostra a ordem.',
+        precisa:'Um mapa: o VR Scan e o plano, com as duas metades na ordem certa.',porta:'O VR Scan',cam:['VR Scan','VR Academy','Attlas Odonto, quando tiver clínica']}};
+    const html=k=>{const p=PE[k]; return `<div class="swap"><span class="bu bu-${p.bu}">${p.entra}</span><h3 style="margin-top:8px">${p.t}</h3><p class="frase">${p.frase}</p><p class="muted" style="margin-top:-8px">${p.quem}</p>
+      <dl style="margin:0"><div class="lin"><dt>Quem é</dt><dd>${p.perfil}</dd></div><div class="lin"><dt>A dor</dt><dd>${p.dor}</dd></div><div class="lin"><dt>O que precisa de verdade</dt><dd>${p.precisa}</dd></div>
+      <div class="lin"><dt>A porta</dt><dd>${p.porta}</dd></div><div class="lin"><dt>A escada dele</dt><dd><span class="cam">${p.cam.map(c=>`<span>${c}</span>`).join('')}</span></dd></div></dl>${p.nota?`<p class="muted" style="margin:10px 0 0">⚠️ ${p.nota}</p>`:''}</div>`};
+    let sel='tecnico'; const box=$('#persona');
+    fixarAltura(box,Object.keys(PE).map(html),()=>html(sel));
+    seg('#seg-persona',v=>{sel=v; box.innerHTML=html(v)});
+    const T=[['Conseguir ou fechar o paciente','gestao','Gestão · Gabriela'],['Diagnosticar e planejar','gestao','Gestão · Gabriela'],['Executar com segurança','tecnica','Técnica · Vinícius'],['Finalizar com estética natural','tecnica','Técnica · Vinícius'],['Sei fazer partes, mas não sei por onde começar','duas','Os dois: o VR Scan e o plano']];
+    set($('#trav'),T.map((t,i)=>`<div><span class="num">${i+1}</span><span>${t[0]}</span><span class="bu bu-${t[1]}">${t[2]}</span></div>`).join(''));
+    stagger('#trav > div');
+  },
+  esteira(){
+    /* a escadinha: cada degrau diz onde mora */
+    const D=[{id:'scan',n:1,nome:'VR Scan',linha:'Descobre onde trava',tk:'Grátis',l:'academy',itens:['scan']},
+      {id:'academy',n:2,nome:'VR Academy',linha:'Aprende técnica e gestão',tk:'Cursos, ou tudo por ano',l:'academy',itens:['guia','organicflow','consulta','academy']},
+      {id:'attlas',n:3,nome:'Attlas Odonto',linha:'Roda a clínica com o método',tk:'Todo mês',mes:1,l:'attlas',itens:['attlas']},
+      {id:'programas',n:4,nome:'VR Hands-On e VR Journey',linha:'A técnica na mão, a gestão na clínica',tk:'Ticket alto',l:'academy',itens:['handson','journey']},
+      {id:'circle',n:5,nome:'VR Circle',linha:'Cresce com os dois',tk:'Todo mês, o topo',mes:1,l:'academy',itens:['circle']}];
+    set($('#escada'),D.map((d,i)=>`<button class="degr${d.mes?' mes':''}${d.l==='attlas'?' att':''}${i===4?' topo':''}" data-k="${i}" style="min-height:${160+i*42}px"><span class="dn">${d.n}</span><span class="dnome">${d.nome}</span><span class="dl2">${d.linha}</span><span class="lugar">${LUGAR[d.l]}</span><span class="dt">${d.tk}</span></button>`).join('')+
+      `<div class="chao"><b>OS da VR</b><span>Por baixo de toda a escada: a VR vê cada venda, de onde veio cada dentista, em que degrau ele está e quando está pronto para subir. Inclusive as clínicas que ela levou para o Attlas Odonto.</span></div>`);
+    const html=i=>{const d=D[i]; const ps=d.itens.map(ach);
+      return `<div class="swap"><span class="bu bu-duas">Degrau ${d.n} de 5 · ${d.l==='attlas'?'o Attlas Odonto, o sistema da clínica':'mora na VR Academy'}</span><h3 style="margin-top:8px">${d.nome}</h3>${ps.length===1?`<p class="tk" style="color:var(--ouro);font-weight:600">${ps[0].tk}</p><p style="font-size:14.5px;margin:0">${ps[0].oque}</p><p class="muted" style="margin:8px 0 0"><b>Leva para:</b> ${ps[0].para}</p>`:
+        `<div class="lista-p">${ps.map(p=>`<div><b>${p.nome}</b><span class="tk">${p.tk}</span><br>${p.oque}</div>`).join('')}</div>`}</div>`};
+    let sel=0; const box=$('#edet');
+    fixarAltura(box,D.map((d,i)=>html(i)),()=>html(sel));
+    const marcar=()=>$$('#escada .degr').forEach(b=>b.classList.toggle('on',+b.dataset.k===sel)); marcar();
+    $('#escada').addEventListener('click',e=>{const b=e.target.closest('.degr'); if(!b||+b.dataset.k===sel)return; sel=+b.dataset.k; marcar(); box.innerHTML=html(sel)});
+    stagger('#escada > .degr');
+    /* o exemplo do VR Scan: troca só a classe dos pontos, sem refazer as linhas */
+    const ETAPAS=[['Análise Full','gestao'],['Mapeamento 3D','gestao'],['Layout Virtual','tecnica'],['Planejamento Preciso','gestao'],['Design VR','tecnica'],['VR+','duas']];
+    const EX={tecnico:{v:[2,2,5,2,5,2],p:'<b>O próximo passo</b>Trava na gestão, não na mão. O VR Scan indica o curso Primeira Consulta VR e, com a clínica pronta, a VR Journey.'},
+      clinica:{v:[3,2,1,2,2,3],p:'<b>O próximo passo</b>Trava na técnica que vende ticket alto. O VR Scan indica o Guia de Polimento e o OrganicFlow e, depois, o VR Hands-On.'},
+      comeco:{v:[2,1,2,1,3,1],p:'<b>O próximo passo</b>Precisa do mapa inteiro. O VR Scan monta o plano da VR Academy na ordem certa, começando pelo que trava mais.'}};
+    set($('#scan'),ETAPAS.map(e=>`<div class="sr"><span class="sn">${e[0]}</span><span class="bu bu-${e[1]}">${BU[e[1]].replace('Os dois braços','Os dois')}</span><span class="dots">${'<i></i>'.repeat(5)}</span></div>`).join(''));
+    const prox=$('#scan-prox'); let exAtual='tecnico';
+    const aplicar=k=>{exAtual=k; const ex=EX[k]; $$('#scan .sr').forEach((r,i)=>{r.classList.toggle('trava',ex.v[i]<=2); $$('i',r).forEach((d,j)=>d.classList.toggle('on',j<ex.v[i]))}); prox.innerHTML=ex.p};
+    fixarAltura(prox,Object.values(EX).map(x=>x.p),()=>EX[exAtual].p);
+    aplicar('tecnico'); seg('#seg-scan',aplicar);
+    /* os nomes */
+    const N=[['VR Scan','O raio-x do dentista','Scan é o escaneamento que todo dentista conhece. Aqui, o que se escaneia é a clínica e a carreira dele.','Raio-X VR · VR Check-up'],
+      ['VR Academy','A escola e os programas','O mesmo padrão do Altta Academy: o nome diz que é onde se estuda.','VR School'],
+      ['Primeira Consulta VR','O curso da consulta da Gabriela','Curso leva o nome do que ensina, como na Altta. Continua o Mapa da Primeira Consulta, que já estava em construção.','Análise Full (o nome da primeira etapa do método) · Consulta de Alto Valor'],
+      ['Attlas Odonto','O sistema da clínica, que a VR vende','Fica como está: o Attlas na versão da odontologia.','Fica'],
+      ['VR Hands-On','O presencial do Vinícius','É o nome que o dentista já usa para curso prático: mão na massa, com correção.','VR Experience · VR Masterclass'],
+      ['VR Journey','A consultoria da Gabriela','A jornada do paciente, da chegada à fidelização, é o território da Gabriela. A consultoria implanta essa jornada na clínica.','VR Clinic · VR Blueprint'],
+      ['VR Circle','A mentoria dos dois, todo mês','Um círculo fechado de quem chegou ao topo: um grupo, e não uma sala de aula.','VR Board · VR Club']];
+    set($('#nomes'),N.map(n=>`<div class="card nome-c"><span class="oq">${n[1]}</span><span class="nm">${n[0]}</span><p>${n[2]}</p><p class="alt"><b>Outras opções:</b> ${n[3]}</p></div>`).join(''));
+    stagger('#nomes > .card');
+  },
+  attlas(){
+    const AR=[['scan','O resultado do VR Scan e o próximo passo'],['vitrine','A vitrine dos cursos'],['curso','O curso comprado, com a IA que tira dúvida'],['todos','Todos os cursos'],['aovivo','O encontro ao vivo do mês'],
+      ['programa','A área do programa: o plano, as tarefas, os encontros'],['numeros','Os números da clínica, lidos do Attlas Odonto com a permissão dela'],['mentoria','A mentoria do mês com os dois'],['grupo','O grupo do VR Circle']];
+    const NV={conta:['scan','vitrine'],curso:['scan','vitrine','curso'],academy:['scan','vitrine','curso','todos','aovivo'],
+      handson:['scan','vitrine','curso','todos','aovivo','programa'],journey:['scan','vitrine','programa','numeros'],circle:AR.map(a=>a[0])};
+    set($('#areas'),AR.map(a=>`<div class="area" data-a="${a[0]}">${a[1]}</div>`).join(''));
+    const nivel=v=>$$('#areas .area').forEach(el=>el.classList.toggle('off',!NV[v].includes(el.dataset.a)));
+    nivel('conta'); seg('#seg-nivel',nivel);
+    const E=[
+      ['Análise Full','Gabriela','Investigar o paciente inteiro antes de falar de dente: a anamnese dirigida e as perguntas da consulta.','A consulta inicial guiada: o roteiro da Gabriela na tela, pergunta por pergunta, e a ficha que se preenche sozinha.'],
+      ['Mapeamento 3D','Gabriela','Os exames, as fotos e as radiografias, e o desenho do estado de saúde apresentado ao paciente.','Fotos, radiografias, escaneamento 3D e câmera intraoral no prontuário, com a apresentação pronta para mostrar ao paciente.'],
+      ['Layout Virtual','Vinícius','O paciente vê o sorriso dele antes de começar.','A simulação do sorriso dentro da plataforma: o "aplicativo do layout" que a Gabriela pediu.'],
+      ['Planejamento Preciso','Gabriela','O plano completo, em etapas: "preparar a casa, organizar a mordida, preencher as falhas, dar estabilidade".','O plano de tratamento e o orçamento por etapa, em PDF com a marca da clínica, e o contrato com parcelas e boletos.'],
+      ['Design VR','Vinícius','A execução: a técnica que entrega o resultado natural. O OrganicFlow é a parte das lentes em resina.','O prontuário com o odontograma, as fotos de cada sessão e o laboratório de prótese.'],
+      ['VR+','Os dois','A manutenção e a fidelização: "depois você entra numa fase só de manutenção, igual a revisão do carro".','O retorno automático, o app do paciente com lembretes (o fio dental, o remédio do pós-operatório) e a indicação com prêmio.']];
+    set($('#passos'),E.map((e,i)=>`<button class="passo${i?'':' on'}" data-k="${i}"><i>${i+1}</i>${e[0]}<small>${e[1]}</small></button>`).join(''));
+    const html=i=>{const e=E[i]; return `<div class="swap"><span class="bu ${e[1]==='Vinícius'?'bu-tecnica':e[1]==='Gabriela'?'bu-gestao':'bu-duas'}">Etapa ${i+1} · quem conduz: ${e[1]}</span><h3 style="margin-top:8px">${e[0]}</h3>
+      <div class="two"><div class="neu"><b>No método</b>${e[2]}</div><div class="sys"><b>No Attlas Odonto</b>${e[3]}</div></div></div>`};
+    let sel=0; const box=$('#pdet');
+    fixarAltura(box,E.map((e,i)=>html(i)),()=>html(sel));
+    $('#passos').addEventListener('click',ev=>{const b=ev.target.closest('.passo'); if(!b||+b.dataset.k===sel)return; sel=+b.dataset.k; $$('#passos .passo').forEach(x=>x.classList.toggle('on',x===b)); box.innerHTML=html(sel)});
+    const PED=['Boleto registrado no banco, com baixa automática e análise de crédito','A nota fiscal dentro do sistema','A balança financeira: o que o paciente pagou contra o que já foi entregue','A inadimplência por mês, e não só no total','O faturamento separado do caixa, e a venda por forma de pagamento','A origem de cada paciente, sem planilha à parte','Os retornos e os lembretes organizados','O CRM com o WhatsApp dentro, e o lead entrando sozinho','A IA marcando direto na agenda','O app do paciente com a indicação premiada (a "Nova Club" que ela já tinha pensado)','A pasta da vigilância pronta: resíduos, segurança do trabalho','Trazer os dados do sistema antigo (uns 7 mil pacientes) e das planilhas'];
+    set($('#pedidos'),PED.map(t=>`<div>${t}</div>`).join('')); stagger('#pedidos > div');
+  },
+  funil(){
+    const F=[['Atenção','O conteúdo dos dois, as palestras e a base de hoje.','Mede: o alcance'],['A porta','O VR Scan e os cursos da VR Academy.','Mede: quem fez o Scan e quem comprou um curso'],['O sistema','O Attlas Odonto, que a VR vende para a clínica.','Mede: quantas clínicas pagam todo mês'],['Os programas','O VR Hands-On e a VR Journey.','Mede: quem subiu de degrau'],['O topo','O VR Circle, que não termina.','Mede: quem fica e indica']];
+    set($('#funil'),F.map((f,i)=>`<div class="fe"><span class="n">${String(i+1).padStart(2,'0')}</span><b>${f[0]}</b><p>${f[1]}</p><p class="mede">${f[2]}</p></div>`).join('')); stagger('#funil > .fe');
+    const C=[['A base de hoje','3.500 a 4.000 dentistas que já compraram. Todos começam pelo VR Scan, e os ex-alunos do presencial vêm primeiro.','agora'],['O conteúdo do Dr. Vinícius','Já traz alcance sem mídia.','agora'],['O conteúdo da Dra. Gabriela','Novo: a metade da gestão, com a Odontonova de bastidor.','agora'],['Palestras e congressos','O CIOSP e os próximos convites.','agora'],
+      ['A indicação de aluno','Quem teve resultado traz outro, com prêmio.','depois'],['As parcerias com dentais','O clube de descontos, que também traz dentista novo.','depois'],['Tráfego para amplificar','Só o post que já deu certo no orgânico, levando ao perfil, medido no OS da VR.','depois'],
+      ['Tráfego para lead frio','"O lead chega frio demais" (Gabriela). Nenhum aluno do presencial veio daí.','nao'],['Funis pagos em espanhol e em inglês','Esperam o Brasil se firmar.','nao']];
+    const TG={agora:['t-ok','Agora'],depois:['t-pl','Depois'],nao:['t-fa','Não']};
+    set($('#canais'),C.map(c=>`<div class="canal" data-s="${c[2]}"><b>${c[0]}</b><span class="tag ${TG[c[2]][0]}">${TG[c[2]][1]}</span><span class="d">${c[1]}</span></div>`).join(''));
+    seg('#seg-canal',v=>$$('#canais .canal').forEach(c=>c.classList.toggle('apagado',v!=='todos'&&c.dataset.s!==v)));
+    const TM=[['BU Técnica','Dr. Vinícius','O conteúdo técnico, os cursos técnicos da VR Academy, o VR Hands-On e os casos do VR Circle. Fica longe do marketing e da operação.','Alunos com caso executado'],
+      ['BU Gestão e direção','Dra. Gabriela','A VR Journey, o curso Primeira Consulta VR, a gestão no VR Circle, as entrevistas para desenhar o Attlas Odonto e a aprovação do que vai ao ar. Não grava curso longo: o ao vivo rende mais.','Clínicas com o ticket subindo'],
+      ['Estratégia e tecnologia','João','A estratégia, o produto, a VR Academy e o OS da VR, o marketing e o comercial com IA (os agentes do marketing e a SDR de IA).','Clínicas pagando todo mês'],
+      ['Parceria','A Altta e o Attlas','A Altta: o marketing, a captação, o comercial, o treinamento de equipe e os cursos de marketing e comercial da VR Academy. O Attlas: o sistema da clínica que a VR vende.','Clínicas no Attlas Odonto'],
+      ['Suporte','A definir 🔴','Uma pessoa de suporte, com a IA dentro da VR Academy para o dia a dia do aluno.','Resposta no mesmo dia']];
+    set($('#time'),TM.map(t=>`<div class="card pessoa"><span class="papel">${t[0]}</span><h3 style="margin:0">${t[1]}</h3><p>${t[2]}</p><p class="num"><b>O número:</b> ${t[3]}</p></div>`).join('')); stagger('#time > .card');
+  },
+  caminho(){
+    const O=[['Fechar o desenho','agora','Esta página, apresentada à Gabriela e ao Vinícius. Os nomes e os preços se decidem na reunião.'],
+      ['Escrever o Método VR inteiro','proximo','As seis etapas, nas duas metades, com as palavras da Gabriela e do Vinícius. É a base de todo curso, de todo programa e de toda página de venda.'],
+      ['O OS da VR e a VR Academy no ar','proximo','O OS da VR nasce da base do OS da Altta (o que foi combinado na reunião), para a venda e o rastreamento. A VR Academy nasce da base do Altta Academy, com o Guia de Polimento, o OrganicFlow e o curso Primeira Consulta VR.'],
+      ['O Attlas Odonto com o método dentro','proximo','A consulta guiada, a simulação do sorriso, a balança financeira e os boletos, e o painel onde a VR vê as clínicas que vendeu (já está no plano do Attlas). A Odontonova entra para testar quando o sistema estiver pronto, com o Controle Odonto ainda ligado, como a Gabriela quis. 🟡 A versão odontológica sobe na fila do Attlas por causa da VR: decide-se na sessão do planejamento do Attlas.'],
+      ['O VR Scan para a base','depois','Primeiro os ex-alunos do presencial, depois quem tem o OrganicFlow, depois os compradores do guia. Cada um ganha a conta na VR Academy e o próximo passo certo.'],
+      ['A VR Journey','depois','Os primeiros clientes saem da base. Cada um com o antes e o depois medido nos números da clínica.'],
+      ['O VR Hands-On vendido para a base','depois','A próxima turma sem um real de tráfego, com o acesso a tudo da VR Academy junto.'],
+      ['O VR Circle','depois','Quando houver clínicas com resultado para formar o primeiro grupo.'],
+      ['O resto da escada','depois','A Imersão de Gestão, a Formação Método VR, os novos cursos técnicos e o inglês.']];
+    const TG={agora:['t-ok','Agora'],proximo:['t-pl','Próximo'],depois:['t-cf','Depois']};
+    set($('#ordem'),O.map((o,i)=>`<button class="oi"><span class="n">${i+1}</span><span class="t">${o[0]}</span><span class="tag ${TG[o[1]][0]}">${TG[o[1]][1]}</span><span class="x">${o[2]}</span></button>`).join(''));
+    stagger('#ordem > .oi');
+    $('#ordem').addEventListener('click',e=>{const b=e.target.closest('.oi'); if(b) b.classList.toggle('ab')});
+    const D=[['2026-10-16, você','O Attlas é uma empresa separada, com marca e logo próprios. Um sistema só, com duas versões: o Attlas, que a Altta vende para a harmonização, e o Attlas Odonto, que a VR vende para a clínica odontológica.'],
+      ['2026-10-16, você','Três peças, cada uma no seu lugar: a VR Academy (a escola e os programas), o Attlas Odonto (o sistema da clínica) e o OS da VR (a venda e o rastreamento). A educação, a mentoria e a consultoria não entram no Attlas.'],
+      ['2026-10-16, você','Os nomes levam a marca VR, no padrão da Altta (Altta Sales, Altta Rise), e dizem o que o produto entrega.'],
+      ['2026-10-16, você','Sem mensalidade baixa de aluno. A recorrência vem do Attlas Odonto e da mentoria.'],
+      ['2026-10-16, você','A consulta da Gabriela vira um curso dentro da VR Academy, como os cursos do Altta Academy.'],
+      ['2026-10-16, você','Duas BUs: a técnica, com o Dr. Vinícius, e a gestão, com a Dra. Gabriela.'],
+      ['2026-10-16, você','A reestruturação é de modelo, de dentista e de escada. Custo e financeiro ficam de fora.'],
+      ['2026-10-08, reunião','O infoproduto de ticket baixo deixa de ser o centro, e o Método VR, técnica e gestão juntas, é o eixo do posicionamento.'],
+      ['2026-10-08, reunião','O Brasil primeiro, por um ano a um ano e meio, já pensando no mundo.'],
+      ['2026-10-08, reunião','O prejuízo anterior zera em 2026-10-08, e a lucratividade conta daqui.'],
+      ['2026-10-08, reunião','Fim da parceria com o Jonatan e do ManyChat. A Odontonova é a prova principal.']];
+    set($('#dec'),D.map(d=>`<div><b>${d[1]}</b><span class="rec">${d[0]}</span></div>`).join(''));
+    const A=[['Os nomes','🟡 Os desta página, na reunião com a Gabriela. As outras opções estão na aba A escada.'],
+      ['O preço de cada degrau','🟡 As faixas desta página. Fecham no primeiro teste com a base.'],
+      ['Como a mensalidade do Attlas Odonto se divide entre a VR e o Attlas','🔴 Decisão dos sócios.'],
+      ['A VR Academy do zero, ou da base do Altta Academy','🟡 Da base do Altta Academy, com banco e marca da VR. É mais rápido, e a base já vendeu.'],
+      ['A VR Academy: curso avulso e o acesso a tudo por ano','🟡 Os dois, como no Altta Academy. O acesso a tudo vem com o encontro ao vivo do mês.'],
+      ['Os cursos de marketing e comercial da VR Academy','🟡 Vêm do Altta Academy, adaptados ao dentista. É a parte da Altta na parceria.'],
+      ['O checkout próprio','🟡 A VR Academy vende com o checkout próprio, para sair da Hotmart. Entra junto com o OS da VR.'],
+      ['Uma entrada só para o dentista','🟡 Depois: a VR Academy e o Attlas Odonto com o mesmo login, quando os dois estiverem no ar.'],
+      ['A frase da VR','🟡 "Técnica sem gestão não cresce. Gestão sem técnica não fideliza." Saiu das palavras da Gabriela, e é hipótese: a copy é de uma sessão própria.'],
+      ['O formato interativo dos cursos','🟡 Ficou para mais conversa na reunião. Recomendada: a Gabriela vê a demonstração do Altta Academy e aceita, com o que o Vinícius já gravou aproveitado.'],
+      ['Quem faz o suporte','🔴 Uma pessoa, com a IA dentro da VR Academy.'],
+      ['Onde a odontologia entra na fila do Attlas','🟡 Sobe por causa da VR. Decide-se na sessão do planejamento do Attlas.']];
+    set($('#aberto'),A.map(a=>`<div class="ab"><b>${a[0]}</b><span class="rec">${a[1]}</span></div>`).join(''));
+  }
+};
+kit.abas(TABS,INIT);
+</script>
+</body>
+</html>
